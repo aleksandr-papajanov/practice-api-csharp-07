@@ -6,16 +6,6 @@ using PracticeApiCSharp07.Infrastructure;
 
 namespace PracticeApiCSharp07.Services
 {
-    public interface IMovieService
-    {
-        Task<IEnumerable<MovieDTO>> GetAllMoviesAsync(GetAllMoviesDTO request);
-        Task<MovieDTO> GetMovieAsync(int id);
-        Task<MovieDetailsDTO> GetMovieDetailsAsync(int id);
-        Task<MovieDTO> CreateMovieAsync(CreateMovieDTO request);
-        Task UpdateMovieAsync(int id, UpdateMovieDTO request);
-        Task DeleteMovieAsync(int id);
-    }
-
     internal class MovieService : IMovieService
     {
         private readonly IRepository<Movie> _movieRepository;
@@ -45,7 +35,7 @@ namespace PracticeApiCSharp07.Services
             if (!string.IsNullOrWhiteSpace(request.Actor))
                 query = query
                     .Where(e => e.MovieActors.Any(e =>
-                        e.Actor.Name.Contains(request.Actor, StringComparison.OrdinalIgnoreCase)));
+                        e.Actor.Name.ToLower().Contains(request.Actor.ToLower()))); // StringComparison here is not available in EF Core LINQ
 
             query = query
                 .Skip(request.Skip)
