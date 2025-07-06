@@ -1,0 +1,6 @@
+@PracticeApiCSharp07_HostAddress = http://localhost:5170
+
+GET {{PracticeApiCSharp07_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
