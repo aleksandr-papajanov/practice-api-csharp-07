@@ -2,6 +2,7 @@
 using PracticeApiCSharp07.DTOs.Actors;
 using PracticeApiCSharp07.DTOs.Mappers;
 using PracticeApiCSharp07.Entities;
+using PracticeApiCSharp07.Helpers;
 using PracticeApiCSharp07.Infrastructure;
 
 namespace PracticeApiCSharp07.Services
@@ -45,7 +46,7 @@ namespace PracticeApiCSharp07.Services
                 .Include(e => e.MovieActors)
                     .ThenInclude(ma => ma.Movie)
                 .FirstOrDefaultAsync(e => e.Id == id)
-                    ?? throw new KeyNotFoundException($"Actor with ID {id} not found.");
+                    ?? throw new NotFoundAppException($"Actor with ID {id} not found.");
 
             return actor.ToDTO();
         }
@@ -60,7 +61,7 @@ namespace PracticeApiCSharp07.Services
 
             if (exists)
             {
-                throw new InvalidDataException($"Actor with ID {actorId} is already assigned to movie with ID {movieId}.");
+                throw new BadRequestAppException($"Actor with ID {actorId} is already assigned to movie with ID {movieId}.");
             }
 
             var movieActor = new MovieActor
@@ -85,7 +86,7 @@ namespace PracticeApiCSharp07.Services
         public async Task UpdateActorAsync(int id, UpdateActorDTO request)
         {
             var actor = await _actorRepository.GetAsync(id)
-                ?? throw new KeyNotFoundException($"Actor with ID {id} not found.");
+                ?? throw new NotFoundAppException($"Actor with ID {id} not found.");
 
             // Update actor properties
             if (request.Name is not null)
@@ -103,7 +104,7 @@ namespace PracticeApiCSharp07.Services
         public async Task DeleteActorAsync(int id)
         {
             var actor = await _actorRepository.GetAsync(id)
-                ?? throw new KeyNotFoundException($"Actor with ID {id} not found.");
+                ?? throw new NotFoundAppException($"Actor with ID {id} not found.");
 
             await _actorRepository.DeleteAsync(actor);
         }
@@ -115,7 +116,7 @@ namespace PracticeApiCSharp07.Services
 
             if (!exists)
             {
-                throw new KeyNotFoundException($"Movie with ID {movieId} not found.");
+                throw new NotFoundAppException($"Movie with ID {movieId} not found.");
             }
         }
 
@@ -126,7 +127,7 @@ namespace PracticeApiCSharp07.Services
 
             if (!exists)
             {
-                throw new KeyNotFoundException($"Actor with ID {actorId} not found.");
+                throw new NotFoundAppException($"Actor with ID {actorId} not found.");
             }
         }
 
@@ -137,7 +138,7 @@ namespace PracticeApiCSharp07.Services
 
             if (exists)
             {
-                throw new InvalidDataException($"Actor with name '{name}' already exists.");
+                throw new BadRequestAppException($"Actor with name '{name}' already exists.");
             }
         }
     }

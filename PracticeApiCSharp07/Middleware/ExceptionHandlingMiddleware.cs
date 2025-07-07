@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http.HttpResults;
+using PracticeApiCSharp07.DTOs.Mappers;
+using PracticeApiCSharp07.Helpers;
 using System.Text.Json;
 
 namespace PracticeApiCSharp07.Middleware
@@ -22,28 +24,32 @@ namespace PracticeApiCSharp07.Middleware
             {
                 await _next(httpContext);
             }
-            catch (KeyNotFoundException ex)
+            catch (NotFoundAppException ex)
             {
-                await WriteErrorResponseAsync(httpContext, StatusCodes.Status404NotFound, ex.Message);
+                await WriteErrorResponseAsync(httpContext, ex);
             }
-            catch (InvalidDataException ex)
+            catch (BadRequestAppException ex)
             {
-                await WriteErrorResponseAsync(httpContext, StatusCodes.Status400BadRequest, ex.Message);
+                await WriteErrorResponseAsync(httpContext, ex);
+            }
+            catch (ValidationAppException ex)
+            {
+                await WriteErrorResponseAsync(httpContext, ex);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred.");
-                await WriteErrorResponseAsync(httpContext, StatusCodes.Status500InternalServerError, "An unexpected error occurred. Please try again later.");
+
+                await WriteErrorResponseAsync(httpContext, new AppExceptionBase());
             }
         }
 
-        private async Task WriteErrorResponseAsync(HttpContext context, int statusCode, string message)
+        private async Task WriteErrorResponseAsync(HttpContext context, AppExceptionBase ex)
         {
-            context.Response.StatusCode = statusCode;
+            context.Response.StatusCode = ex.StatusCode;
             context.Response.ContentType = "application/json";
 
-            var error = new { message };
-            var json = JsonSerializer.Serialize(error);
+            var json = JsonSerializer.Serialize(ex.ToDTO());
 
             await context.Response.WriteAsync(json);
         }

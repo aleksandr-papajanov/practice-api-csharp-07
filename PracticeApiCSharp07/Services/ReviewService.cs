@@ -2,6 +2,7 @@
 using PracticeApiCSharp07.DTOs.Mappers;
 using PracticeApiCSharp07.DTOs.Reviews;
 using PracticeApiCSharp07.Entities;
+using PracticeApiCSharp07.Helpers;
 using PracticeApiCSharp07.Infrastructure;
 
 namespace PracticeApiCSharp07.Services
@@ -22,7 +23,7 @@ namespace PracticeApiCSharp07.Services
         public async Task<ReviewDTO> GetReviewAsync(int id)
         {
             var review = await _reviewRepository.GetAsync(id)
-                 ?? throw new KeyNotFoundException($"Review with ID {id} not found.");
+                 ?? throw new NotFoundAppException($"Review with ID {id} not found.");
 
             return review.ToDTO();
         }
@@ -42,7 +43,7 @@ namespace PracticeApiCSharp07.Services
         public async Task UpdateReviewAsync(int id, UpdateReviewDTO request)
         {
             var review = await _reviewRepository.GetAsync(id)
-                ?? throw new KeyNotFoundException($"Review with ID {id} not found.");
+                ?? throw new NotFoundAppException($"Review with ID {id} not found.");
             
             if (request.ReviewerName is not null)
                 review.ReviewerName = request.ReviewerName;
@@ -59,7 +60,7 @@ namespace PracticeApiCSharp07.Services
         public async Task DeleteReviewAsync(int id)
         {
             var review = await _reviewRepository.GetAsync(id)
-                ?? throw new KeyNotFoundException($"Review with ID {id} not found.");
+                ?? throw new NotFoundAppException($"Review with ID {id} not found.");
 
             await _reviewRepository.DeleteAsync(review);
         }
@@ -71,7 +72,7 @@ namespace PracticeApiCSharp07.Services
 
             if (!exists)
             {
-                throw new KeyNotFoundException($"Movie with ID {movieId} not found.");
+                throw new NotFoundAppException($"Movie with ID {movieId} not found.");
             }
         }
 
@@ -83,7 +84,7 @@ namespace PracticeApiCSharp07.Services
 
             if (!exists)
             {
-                throw new InvalidDataException($"Review by {reviewerName} for movie ID {movieId} already exists.");
+                throw new BadRequestAppException($"Review by {reviewerName} for movie ID {movieId} already exists.");
             }
         }
     }

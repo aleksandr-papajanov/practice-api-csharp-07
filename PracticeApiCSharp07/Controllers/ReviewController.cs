@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using PracticeApiCSharp07.DTOs;
 using PracticeApiCSharp07.DTOs.Reviews;
 using PracticeApiCSharp07.Services;
 
@@ -30,7 +31,7 @@ namespace PracticeApiCSharp07.Controllers
         /// <returns>The review data.</returns>
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ReviewDTO))]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ExceptionDTO))]
         public async Task<ActionResult<ReviewDTO>> Get([FromRoute] int id)
         {
             var review = await _service.GetReviewAsync(id);
@@ -44,8 +45,8 @@ namespace PracticeApiCSharp07.Controllers
         /// <returns>The created review with location header.</returns>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ReviewDTO))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ExceptionDTO))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ExceptionDTO))]
         public async Task<IActionResult> Create([FromBody] CreateReviewDTO request)
         {
             var review = await _service.CreateReviewAsync(request);
@@ -60,8 +61,8 @@ namespace PracticeApiCSharp07.Controllers
         /// <returns>No content on success.</returns>
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest)]
-        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ExceptionDTO))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ExceptionDTO))]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateReviewDTO request)
         {
             await _service.UpdateReviewAsync(id, request);

@@ -2,6 +2,7 @@
 using PracticeApiCSharp07.DTOs.Mappers;
 using PracticeApiCSharp07.DTOs.Movies;
 using PracticeApiCSharp07.Entities;
+using PracticeApiCSharp07.Helpers;
 using PracticeApiCSharp07.Infrastructure;
 
 namespace PracticeApiCSharp07.Services
@@ -49,7 +50,7 @@ namespace PracticeApiCSharp07.Services
         public async Task<MovieDTO> GetMovieAsync(int id)
         {
             var movie = await _movieRepository.GetAsync(id)
-                ?? throw new KeyNotFoundException($"Movie with ID {id} not found.");
+                ?? throw new NotFoundAppException($"Movie with ID {id} not found.");
 
             return movie.ToDTO();
         }
@@ -63,7 +64,7 @@ namespace PracticeApiCSharp07.Services
                 .Include(e => e.Reviews)
                 .Where(e => e.Id == id)
                 .FirstOrDefaultAsync()
-                    ?? throw new KeyNotFoundException($"Movie with ID {id} not found.");
+                    ?? throw new NotFoundAppException($"Movie with ID {id} not found.");
 
             return movie.ToDetailsDTO();
         }
@@ -88,7 +89,7 @@ namespace PracticeApiCSharp07.Services
             var movie = await _movieRepository.All
                 .Include(e => e.Details)
                 .FirstOrDefaultAsync(e => e.Id == id)
-                    ?? throw new KeyNotFoundException($"Movie with ID {id} not found.");
+                    ?? throw new NotFoundAppException($"Movie with ID {id} not found.");
 
             // Update movie properties
             if (request.Title is not null)
@@ -114,7 +115,7 @@ namespace PracticeApiCSharp07.Services
                 // Create new details if they don't exist
                 if (request.Synopsis is null || request.Language is null || request.Budget is null)
                 {
-                    throw new InvalidDataException("All details must be provided when initializing movie details.");
+                    throw new BadRequestAppException("All details must be provided when initializing movie details.");
                 }
 
                 var details = new MovieDetails
@@ -148,7 +149,7 @@ namespace PracticeApiCSharp07.Services
         {
             var movie = await _movieRepository.All
                 .FirstOrDefaultAsync(e => e.Id == id)
-                    ?? throw new KeyNotFoundException($"Movie with ID {id} not found.");
+                    ?? throw new NotFoundAppException($"Movie with ID {id} not found.");
 
             await _movieRepository.DeleteAsync(movie);
         }
@@ -159,7 +160,7 @@ namespace PracticeApiCSharp07.Services
 
             if (exists)
             {
-                throw new InvalidDataException($"Movie with title '{title}' already exists.");
+                throw new BadRequestAppException($"Movie with title '{title}' already exists.");
             }
         }
     }

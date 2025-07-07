@@ -4,6 +4,7 @@ using PracticeApiCSharp07.Helpers;
 using PracticeApiCSharp07.Infrastructure;
 using PracticeApiCSharp07.Middleware;
 using PracticeApiCSharp07.Services;
+using ProductOrderApi.Middleware;
 using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,7 +18,16 @@ builder.Services.AddScoped<IMovieService, MovieService>();
 builder.Services.AddScoped<IActorService, ActorService>();
 builder.Services.AddScoped<IReviewService, ReviewService>();
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(setup =>
+{
+    // Add custom middleware for model validation
+    setup.Filters.Add<ValidateModelStateFilterAttribute>();
+})
+    .ConfigureApiBehaviorOptions(setup =>
+    {
+        // For custom model validation to work
+        setup.SuppressModelStateInvalidFilter = true;
+    });
 
 // Add Swagger for API documentation
 builder.Services.AddEndpointsApiExplorer();
