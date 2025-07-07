@@ -14,6 +14,7 @@ namespace PracticeApiCSharp07.Controllers
     /// </summary>
     [Route("api/movies")]
     [ApiController]
+    [Produces("application/json")]
     public class MovieController : ControllerBase
     {
         private readonly IMovieService _service;
@@ -46,6 +47,7 @@ namespace PracticeApiCSharp07.Controllers
         /// <returns>The movie data.</returns>
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MovieDTO))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<MovieDTO>> Get([FromRoute] int id)
         {
             var movie = await _service.GetMovieAsync(id);
@@ -59,6 +61,7 @@ namespace PracticeApiCSharp07.Controllers
         /// <returns>The detailed movie data.</returns>
         [HttpGet("{id:int}/details")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(MovieDetailsDTO))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<MovieDetailsDTO>> GetDetails([FromRoute] int id)
         {
             var movie = await _service.GetMovieDetailsAsync(id);
@@ -72,6 +75,8 @@ namespace PracticeApiCSharp07.Controllers
         /// <returns>The created movie with location header.</returns>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(MovieDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Create([FromBody] CreateMovieDTO request)
         {
             var movie = await _service.CreateMovieAsync(request);
@@ -86,6 +91,8 @@ namespace PracticeApiCSharp07.Controllers
         /// <returns>No content on success.</returns>
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateMovieDTO request)
         {
             await _service.UpdateMovieAsync(id, request);
@@ -99,6 +106,7 @@ namespace PracticeApiCSharp07.Controllers
         /// <returns>No content on success.</returns>
         [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
             await _service.DeleteMovieAsync(id);

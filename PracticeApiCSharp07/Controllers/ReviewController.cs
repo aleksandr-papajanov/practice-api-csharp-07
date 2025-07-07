@@ -9,6 +9,7 @@ namespace PracticeApiCSharp07.Controllers
     /// </summary>
     [Route("api/reviews")]
     [ApiController]
+    [Produces("application/json")]
     public class ReviewController : ControllerBase
     {
         private readonly IReviewService _service;
@@ -29,6 +30,7 @@ namespace PracticeApiCSharp07.Controllers
         /// <returns>The review data.</returns>
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ReviewDTO))]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ReviewDTO>> Get([FromRoute] int id)
         {
             var review = await _service.GetReviewAsync(id);
@@ -42,6 +44,8 @@ namespace PracticeApiCSharp07.Controllers
         /// <returns>The created review with location header.</returns>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ReviewDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Create([FromBody] CreateReviewDTO request)
         {
             var review = await _service.CreateReviewAsync(request);
@@ -56,6 +60,8 @@ namespace PracticeApiCSharp07.Controllers
         /// <returns>No content on success.</returns>
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateReviewDTO request)
         {
             await _service.UpdateReviewAsync(id, request);
@@ -69,6 +75,7 @@ namespace PracticeApiCSharp07.Controllers
         /// <returns>No content on success.</returns>
         [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
             await _service.DeleteReviewAsync(id);

@@ -29,17 +29,10 @@ builder.Services.AddSwaggerGen(o =>
 
 var app = builder.Build();
 
-// Seed the database with initial data
-using (var scope = app.Services.CreateScope())
-{
-    var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-    var seeder = new DataSeeder(context);
-    await seeder.SeedAsync();
-}
-
 // Turn on Swagger only in development mode
 if (app.Environment.IsDevelopment())
 {
+    await app.SeedDataAsync();
     app.UseSwagger();
     app.UseSwaggerUI(); // можно передать опции, например endpoint, заголовок и т.д.
 }
