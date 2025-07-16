@@ -1,6 +1,6 @@
 ﻿using Movie.Core.DTOs.Films;
 
-namespace Movie.Contracts
+namespace Movie.Contracts.Services
 {
     public interface IFilmService
     {

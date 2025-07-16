@@ -1,29 +1,27 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Movie.Contracts;
+using Movie.Contracts.Services;
+using Movie.Core.Abstractions;
 using Movie.Core.DTOs.Films;
 using Movie.Core.DTOs.Mappers;
 using Movie.Core.Entities;
 using Movie.Core.Exceptions;
-using Movie.Data.Infrastructure;
 
 namespace Movie.Services
 {
     public class FilmService : IFilmService
     {
-        private readonly IRepository<Film> _movieRepository;
-        private readonly IRepository<FilmDetails> _detailsRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public FilmService(
-            IRepository<Film> movieRepository,
-            IRepository<FilmDetails> detailsRepository)
+
+        public FilmService(IUnitOfWork unitOfWork)
         {
-            _movieRepository = movieRepository;
-            _detailsRepository = detailsRepository;
+            _unitOfWork = unitOfWork;
         }
+
 
         public async Task<IEnumerable<FilmDTO>> GetAllFilmsAsync(GetAllFilmsDTO request)
         {
-            var query = _movieRepository.All
+            var query = _unitOfWork.FilmRepository.All
                 .Include(e => e.FilmActors)
                     .ThenInclude(e => e.Actor)
                 .AsQueryable();
@@ -50,7 +48,7 @@ namespace Movie.Services
 
         public async Task<FilmDTO> GetFilmAsync(int id)
         {
-            var movie = await _movieRepository.GetAsync(id)
+            var movie = await _unitOfWork.FilmRepository.GetAsync(id)
                 ?? throw new NotFoundAppException($"Movie with ID {id} not found.");
 
             return movie.ToDTO();
@@ -58,7 +56,7 @@ namespace Movie.Services
 
         public async Task<FilmDetailsDTO> GetFilmDetailsAsync(int id)
         {
-            var movie = await _movieRepository.All
+            var movie = await _unitOfWork.FilmRepository.All
                 .Include(e => e.Details)
                 .Include(e => e.FilmActors)
                     .ThenInclude(e => e.Actor)
@@ -76,18 +74,18 @@ namespace Movie.Services
             var details = request.ToDetailsEntity();
 
             await EnsureMovieUniqAsync(movie.Title);
-            await _movieRepository.AddAsync(movie);
+            await _unitOfWork.FilmRepository.AddAsync(movie);
 
             // Ensure that the details are linked to the movie and save
             details.FilmId = movie.Id;
-            await _detailsRepository.AddAsync(details);
+            await _unitOfWork.FilmDetailsRepository.AddAsync(details);
 
             return movie.ToDTO();
         }
 
         public async Task UpdateFilmAsync(int id, UpdateFilmDTO request)
         {
-            var movie = await _movieRepository.All
+            var movie = await _unitOfWork.FilmRepository.All
                 .Include(e => e.Details)
                 .FirstOrDefaultAsync(e => e.Id == id)
                     ?? throw new NotFoundAppException($"Movie with ID {id} not found.");
@@ -108,7 +106,7 @@ namespace Movie.Services
             if (request.Duration.HasValue)
                 movie.Duration = request.Duration.Value;
 
-            await _movieRepository.UpdateAsync(movie);
+            await _unitOfWork.FilmRepository.UpdateAsync(movie);
 
             // Update movie details
             if (movie.Details is null)
@@ -128,7 +126,7 @@ namespace Movie.Services
                 };
 
                 movie.Details = details;
-                await _detailsRepository.AddAsync(details);
+                await _unitOfWork.FilmDetailsRepository.AddAsync(details);
             }
             else
             {
@@ -142,22 +140,22 @@ namespace Movie.Services
                 if (request.Budget.HasValue)
                     movie.Details.Budget = request.Budget.Value;
 
-                await _detailsRepository.UpdateAsync(movie.Details);
+                await _unitOfWork.FilmDetailsRepository.UpdateAsync(movie.Details);
             }
         }
 
         public async Task DeleteFilmAsync(int id)
         {
-            var movie = await _movieRepository.All
+            var movie = await _unitOfWork.FilmRepository.All
                 .FirstOrDefaultAsync(e => e.Id == id)
                     ?? throw new NotFoundAppException($"Movie with ID {id} not found.");
 
-            await _movieRepository.DeleteAsync(movie);
+            await _unitOfWork.FilmRepository.DeleteAsync(movie);
         }
 
         private async Task EnsureMovieUniqAsync(string title)
         {
-            var exists = await _movieRepository.All.AnyAsync(e => e.Title == title);
+            var exists = await _unitOfWork.FilmRepository.All.AnyAsync(e => e.Title == title);
 
             if (exists)
             {

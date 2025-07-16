@@ -1,4 +1,4 @@
-﻿using Movie.Data.Infrastructure;
+﻿using Movie.Data;
 
 namespace Movie.API.Helpers
 {

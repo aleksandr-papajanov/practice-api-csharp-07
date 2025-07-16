@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Movie.Core.Entities;
-using Movie.Data.Infrastructure;
+using Movie.Data;
 
 namespace Movie.API.Helpers
 {

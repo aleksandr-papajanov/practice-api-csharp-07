@@ -1,33 +1,27 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Movie.Contracts;
+using Movie.Contracts.Services;
+using Movie.Core.Abstractions;
 using Movie.Core.DTOs.Actors;
 using Movie.Core.DTOs.Mappers;
 using Movie.Core.Entities;
 using Movie.Core.Exceptions;
-using Movie.Data.Infrastructure;
 
 namespace Movie.Services
 {
     public class ActorService : IActorService
     {
-        private readonly IRepository<Film> _filmRepository;
-        private readonly IRepository<Actor> _actorRepository;
-        private readonly IRepository<FilmActor> _filmActorRepository;
+        private readonly IUnitOfWork _unitOfWork;
 
-        public ActorService(
-            IRepository<Film> movieRepository,
-            IRepository<Actor> actorRepository,
-            IRepository<FilmActor> movieActorRepository)
+
+        public ActorService(IUnitOfWork unitOfWork)
         {
-            _filmRepository = movieRepository;
-            _actorRepository = actorRepository;
-            _filmActorRepository = movieActorRepository;
+            _unitOfWork = unitOfWork;
         }
 
 
         public async Task<IEnumerable<ActorDTO>> GetAllActorsAsync(GetAllActorsDTO request)
         {
-            var query = _actorRepository.All
+            var query = _unitOfWork.ActorRepository.All
                 .Include(e => e.FilmActors)
                     .ThenInclude(e => e.Film)
                 .AsQueryable();
@@ -43,7 +37,7 @@ namespace Movie.Services
 
         public async Task<ActorDTO> GetActorAsync(int id)
         {
-            var actor = await _actorRepository.All
+            var actor = await _unitOfWork.ActorRepository.All
                 .Include(e => e.FilmActors)
                     .ThenInclude(ma => ma.Film)
                 .FirstOrDefaultAsync(e => e.Id == id)
@@ -57,7 +51,7 @@ namespace Movie.Services
             await EnsureMovieExistsAsync(movieId);
             await EnsureActorExistsAsync(actorId);
 
-            var exists = await _filmActorRepository.All
+            var exists = await _unitOfWork.FilmActorRepository.All
                 .AnyAsync(e => e.FilmId == movieId && e.ActorId == actorId);
 
             if (exists)
@@ -71,7 +65,7 @@ namespace Movie.Services
                 ActorId = actorId
             };
 
-            await _filmActorRepository.AddAsync(movieActor);
+            await _unitOfWork.FilmActorRepository.AddAsync(movieActor);
         }
 
         public async Task<ActorDTO> CreateActorAsync(CreateActorDTO request)
@@ -79,14 +73,14 @@ namespace Movie.Services
             var actor = request.ToEntity();
 
             await EnsureActorUniqAsync(actor.Name);
-            await _actorRepository.AddAsync(actor);
+            await _unitOfWork.ActorRepository.AddAsync(actor);
 
             return actor.ToDTO();
         }
 
         public async Task UpdateActorAsync(int id, UpdateActorDTO request)
         {
-            var actor = await _actorRepository.GetAsync(id)
+            var actor = await _unitOfWork.ActorRepository.GetAsync(id)
                 ?? throw new NotFoundAppException($"Actor with ID {id} not found.");
 
             // Update actor properties
@@ -99,20 +93,20 @@ namespace Movie.Services
             if (request.BirthYear is not null)
                 actor.BirthYear = (int)request.BirthYear;
 
-            await _actorRepository.UpdateAsync(actor);
+            await _unitOfWork.ActorRepository.UpdateAsync(actor);
         }
 
         public async Task DeleteActorAsync(int id)
         {
-            var actor = await _actorRepository.GetAsync(id)
+            var actor = await _unitOfWork.ActorRepository.GetAsync(id)
                 ?? throw new NotFoundAppException($"Actor with ID {id} not found.");
 
-            await _actorRepository.DeleteAsync(actor);
+            await _unitOfWork.ActorRepository.DeleteAsync(actor);
         }
 
         private async Task EnsureMovieExistsAsync(int movieId)
         {
-            var exists = await _filmRepository.All
+            var exists = await _unitOfWork.FilmRepository.All
                 .AnyAsync(e => e.Id == movieId);
 
             if (!exists)
@@ -123,7 +117,7 @@ namespace Movie.Services
 
         private async Task EnsureActorExistsAsync(int actorId)
         {
-            var exists = await _actorRepository.All
+            var exists = await _unitOfWork.ActorRepository.All
                 .AnyAsync(e => e.Id == actorId);
 
             if (!exists)
@@ -134,7 +128,7 @@ namespace Movie.Services
 
         private async Task EnsureActorUniqAsync(string name)
         {
-            var exists = await _actorRepository.All
+            var exists = await _unitOfWork.ActorRepository.All
                 .AnyAsync(e => e.Name == name);
 
             if (exists)

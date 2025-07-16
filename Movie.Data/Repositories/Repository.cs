@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Movie.Core.Abstractions.Repositories;
 using Movie.Core.Entities;
 
-namespace Movie.Data.Infrastructure
+namespace Movie.Data.Repositories
 {
     public class Repository<T> : IRepository<T>
         where T : EntityBase

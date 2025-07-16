@@ -1,6 +1,6 @@
 ﻿using Movie.Core.Entities;
 
-namespace Movie.Data.Infrastructure
+namespace Movie.Core.Abstractions.Repositories
 {
     public interface IRepository<T>
         where T : EntityBase

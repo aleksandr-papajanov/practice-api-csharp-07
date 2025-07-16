@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Movie.Contracts;
+using Movie.Contracts.Services;
 using Movie.Core.DTOs;
 using Movie.Core.DTOs.Reviews;
 
