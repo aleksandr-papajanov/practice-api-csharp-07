@@ -19,55 +19,25 @@ namespace Movie.Data.Repositories
 
         }
 
-        public virtual async Task AddAsync(T item)
-        {
-            await _set.AddAsync(item);
-            await _context.SaveChangesAsync();
-        }
-
-        public virtual async Task DeleteAsync(T item)
-        {
-            _set.Remove(item);
-            await _context.SaveChangesAsync();
-        }
-
         public virtual async Task<T?> GetAsync(int id)
         {
             return await _set.FindAsync(id);
         }
 
-        public virtual async Task UpdateAsync(T item)
+        public virtual void Add(T item)
+        {
+            _set.AddAsync(item);
+        }
+
+        public virtual void Delete(T item)
+        {
+            _set.Remove(item);
+        }
+
+
+        public virtual void Update(T item)
         {
             _set.Update(item);
-            await _context.SaveChangesAsync();
-        }
-
-        public virtual async Task DeleteRangeAsync(IEnumerable<T> range)
-        {
-            _set.RemoveRange(range);
-            await _context.SaveChangesAsync();
-        }
-
-        public virtual async Task AddRangeAsync(IEnumerable<T> item)
-        {
-            _set.AddRange(item);
-            await _context.SaveChangesAsync();
-        }
-
-        public virtual async Task UpdateRangeAsync(IEnumerable<T> range)
-        {
-            _set.UpdateRange(range);
-            await _context.SaveChangesAsync();
-        }
-
-        public virtual async Task SaveAsync(T item)
-        {
-            await _context.SaveChangesAsync();
-        }
-
-        public virtual async Task ReloadAsync(T item)
-        {
-            await _context.Entry(item).ReloadAsync();
         }
     }
 }

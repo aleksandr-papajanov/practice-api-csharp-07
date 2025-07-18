@@ -9,5 +9,7 @@ namespace Movie.Core.Abstractions.Repositories
 {
     public interface IFilmRepository : IRepository<Film>
     {
+        void EnsureExists(int filmId);
+        void EnsureUnique(string title);
     }
 }

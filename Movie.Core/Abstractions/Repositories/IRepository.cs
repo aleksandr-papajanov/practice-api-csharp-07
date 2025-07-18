@@ -7,13 +7,8 @@ namespace Movie.Core.Abstractions.Repositories
     {
         IQueryable<T> All { get; }
         Task<T?> GetAsync(int id);
-        Task AddAsync(T item);
-        Task AddRangeAsync(IEnumerable<T> range);
-        Task UpdateAsync(T item);
-        Task UpdateRangeAsync(IEnumerable<T> range);
-        Task DeleteAsync(T item);
-        Task DeleteRangeAsync(IEnumerable<T> range);
-        Task ReloadAsync(T item);
-        Task SaveAsync(T item);
+        void Add(T item);
+        void Update(T item);
+        void Delete(T item);
     }
 }

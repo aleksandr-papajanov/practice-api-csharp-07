@@ -9,5 +9,8 @@ namespace Movie.Core.Abstractions.Repositories
 {
     public interface IReviewRepository : IRepository<Review>
     {
+        void EnsureExists(int filmId);
+        void EnsureIsNotContributed(int filmId, string reviewer);
+        Task<Review> GetOrThrowAsync(int id);
     }
 }

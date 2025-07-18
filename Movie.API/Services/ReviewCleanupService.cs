@@ -35,12 +35,12 @@ namespace Movie.API.Services
                 .Where(f => f.Year < cutoffYear && f.Reviews.Count > 5)
                 .SelectMany(f => f.Reviews
                     .OrderByDescending(film => film.Id) // Newest first
-                    .Skip(5) // Keep only the latest 5 reviews
+                    .Skip(5) // Keep latest 5 reviews
                 );
 
             foreach (var review in reviewsToDelete)
             {
-                await unitOfWork.ReviewRepository.DeleteAsync(review);
+                unitOfWork.ReviewRepository.Delete(review);
             }
 
             await unitOfWork.CompleteAsync();

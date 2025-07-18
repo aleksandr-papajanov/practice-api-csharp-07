@@ -9,20 +9,18 @@ namespace Movie.Services
 {
     public class ReviewService : IReviewService
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IUnitOfWork _uow;
 
 
         public ReviewService(IUnitOfWork unitOfWork)
         {
-            _unitOfWork = unitOfWork;
+            _uow = unitOfWork;
         }
 
 
         public async Task<ReviewDTO> GetReviewAsync(int id)
         {
-            var review = await _unitOfWork.ReviewRepository.GetAsync(id)
-                 ?? throw new ReviewNotFoundAppException(id);
-
+            var review = await _uow.ReviewRepository.GetOrThrowAsync(id);
             return review.ToDTO();
         }
 
@@ -30,18 +28,18 @@ namespace Movie.Services
         {
             var review = request.ToEntity();
 
-            await EnsureFilmExistsAsync(review.FilmId);
-            await EnsureReviewUniqAsync(review.FilmId, review.ReviewerName);
+            _uow.FilmRepository.EnsureExists(review.FilmId);
+            _uow.ReviewRepository.EnsureIsNotContributed(review.FilmId, review.ReviewerName);
 
-            await _unitOfWork.ReviewRepository.AddAsync(review);
+            _uow.ReviewRepository.Add(review);
+            await _uow.CompleteAsync();
 
             return review.ToDTO();
         }
 
         public async Task UpdateReviewAsync(int id, UpdateReviewDTO request)
         {
-            var review = await _unitOfWork.ReviewRepository.GetAsync(id)
-                ?? throw new ReviewNotFoundAppException(id);
+            var review = await _uow.ReviewRepository.GetOrThrowAsync(id);
 
             if (request.ReviewerName is not null)
                 review.ReviewerName = request.ReviewerName;
@@ -52,38 +50,15 @@ namespace Movie.Services
             if (request.Rating.HasValue)
                 review.Rating = request.Rating.Value;
 
-            await _unitOfWork.ReviewRepository.UpdateAsync(review);
+            _uow.ReviewRepository.Update(review);
+            await _uow.CompleteAsync();
         }
 
         public async Task DeleteReviewAsync(int id)
         {
-            var review = await _unitOfWork.ReviewRepository.GetAsync(id)
-                ?? throw new ReviewNotFoundAppException(id);
-
-            await _unitOfWork.ReviewRepository.DeleteAsync(review);
-        }
-
-        private async Task EnsureFilmExistsAsync(int filmId)
-        {
-            var exists = await _unitOfWork.FilmRepository.All
-                .AnyAsync(e => e.Id == filmId);
-
-            if (!exists)
-            {
-                throw new FilmNotFoundAppException(filmId);
-            }
-        }
-
-        private async Task EnsureReviewUniqAsync(int filmId, string reviewer)
-        {
-            var exists = await _unitOfWork.ReviewRepository.All
-                .AnyAsync(e => e.FilmId == filmId &&
-                               e.ReviewerName == reviewer);
-
-            if (!exists)
-            {
-                throw new ReviewerContributionConflictAppException(reviewer, filmId);
-            }
+            var review = await _uow.ReviewRepository.GetOrThrowAsync(id);
+            _uow.ReviewRepository.Delete(review);
+            await _uow.CompleteAsync();
         }
     }
 }

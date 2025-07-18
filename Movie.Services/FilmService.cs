@@ -13,18 +13,18 @@ namespace Movie.Services
 {
     public class FilmService : IFilmService
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IUnitOfWork _uow;
 
 
         public FilmService(IUnitOfWork unitOfWork)
         {
-            _unitOfWork = unitOfWork;
+            _uow = unitOfWork;
         }
 
 
         public async Task<PaginatedResult<FilmDTO>> GetAllFilmsAsync(GetAllFilmsDTO request)
         {
-            var query = _unitOfWork.FilmRepository.All
+            var query = _uow.FilmRepository.All
                 .Include(e => e.FilmActors)
                     .ThenInclude(e => e.Actor)
                 .Include(e => e.FilmGenre)
@@ -49,14 +49,14 @@ namespace Movie.Services
 
             return new PaginatedResult<FilmDTO>(
                 items: films.Select(e => e.ToDTO()).ToList(),
-                totalCount: await _unitOfWork.ActorRepository.All.CountAsync(),
+                totalCount: await _uow.ActorRepository.All.CountAsync(),
                 currentPage: request.PageNumber,
                 pageSize: request.PageSize);
         }
 
         public async Task<FilmDTO> GetFilmAsync(int id)
         {
-            var film = await _unitOfWork.FilmRepository.All
+            var film = await _uow.FilmRepository.All
                 .Include(e => e.FilmGenre)
                 .FirstOrDefaultAsync(e => e.Id == id)
                     ?? throw new FilmNotFoundAppException(id);
@@ -66,7 +66,7 @@ namespace Movie.Services
 
         public async Task<FilmDetailsDTO> GetFilmDetailsAsync(int id)
         {
-            var film = await _unitOfWork.FilmRepository.All
+            var film = await _uow.FilmRepository.All
                 .Include(e => e.Details)
                 .Include(e => e.FilmActors)
                     .ThenInclude(e => e.Actor)
@@ -80,26 +80,22 @@ namespace Movie.Services
 
         public async Task<FilmDTO> CreateFilmAsync(CreateFilmDTO request)
         {
+            _uow.FilmRepository.EnsureUnique(request.Title);
+            var genre = await _uow.FilmGenreRepository.GetOrThrowAsync(request.Genre);
+
             var film = request.ToEntity();
-            var details = request.ToDetailsEntity();
-
-            // Ensure the genre exists
-            var genre = await FindGenreAsync(request.Genre);
             film.FilmGenre = genre;
+            film.Details = request.ToDetailsEntity();
 
-            await EnsureFilmUniqAsync(film.Title);
-            await _unitOfWork.FilmRepository.AddAsync(film);
-
-            // Ensure that the details are linked to the film and save
-            details.FilmId = film.Id;
-            await _unitOfWork.FilmDetailsRepository.AddAsync(details);
+            _uow.FilmRepository.Add(film);
+            await _uow.CompleteAsync();
 
             return film.ToDTO();
         }
 
         public async Task UpdateFilmAsync(int id, UpdateFilmDTO request)
         {
-            var film = await _unitOfWork.FilmRepository.All
+            var film = await _uow.FilmRepository.All
                 .Include(e => e.Details)
                 .FirstOrDefaultAsync(e => e.Id == id)
                     ?? throw new FilmNotFoundAppException(id);
@@ -107,13 +103,13 @@ namespace Movie.Services
             // Update film properties
             if (request.Title is not null)
             {
-                await EnsureFilmUniqAsync(request.Title);
+                _uow.FilmRepository.EnsureUnique(request.Title);
                 film.Title = request.Title;
             }
 
             if (request.Genre is not null)
             {
-                var genre = await FindGenreAsync(request.Genre);
+                var genre = await _uow.FilmGenreRepository.GetOrThrowAsync(request.Genre);
                 film.FilmGenre = genre;
             }
 
@@ -123,7 +119,7 @@ namespace Movie.Services
             if (request.Duration.HasValue)
                 film.Duration = request.Duration.Value;
 
-            await _unitOfWork.FilmRepository.UpdateAsync(film);
+            _uow.FilmRepository.Update(film);
 
             // Update film details
             if (film.Details is null)
@@ -143,7 +139,7 @@ namespace Movie.Services
                 };
 
                 film.Details = details;
-                await _unitOfWork.FilmDetailsRepository.AddAsync(details);
+                _uow.FilmDetailsRepository.Add(details);
             }
             else
             {
@@ -157,8 +153,10 @@ namespace Movie.Services
                 if (request.Budget.HasValue)
                     film.Details.Budget = request.Budget.Value;
 
-                await _unitOfWork.FilmDetailsRepository.UpdateAsync(film.Details);
+                _uow.FilmDetailsRepository.Update(film.Details);
             }
+
+            await _uow.CompleteAsync();
         }
 
         public async Task UpdateFilmWithPatchDocumentAsync(int id, JsonPatchDocument<UpdateFilmDTO> patchDocument)
@@ -176,33 +174,11 @@ namespace Movie.Services
 
         public async Task DeleteFilmAsync(int id)
         {
-            var film = await _unitOfWork.FilmRepository.All
-                .FirstOrDefaultAsync(e => e.Id == id)
-                    ?? throw new FilmNotFoundAppException(id);
+            var film = await _uow.FilmRepository.GetAsync(id)
+                ?? throw new FilmNotFoundAppException(id);
 
-            await _unitOfWork.FilmRepository.DeleteAsync(film);
-        }
-
-        private async Task EnsureFilmUniqAsync(string title)
-        {
-            var exists = await _unitOfWork.FilmRepository.All.AnyAsync(e => e.Title == title);
-
-            if (exists)
-            {
-                throw new FilmTitleConflictAppException(title);
-            }
-        }
-        
-        private async Task<FilmGenre> FindGenreAsync(string genre)
-        {
-            var exists = await _unitOfWork.FilmGenreRepository.All.FirstOrDefaultAsync(e => e.Name == genre);
-
-            if (exists == null)
-            {
-                throw new GenreNotExistsAppException(genre);
-            }
-
-            return exists;
+            _uow.FilmRepository.Delete(film);
+            await _uow.CompleteAsync();
         }
     }
 }

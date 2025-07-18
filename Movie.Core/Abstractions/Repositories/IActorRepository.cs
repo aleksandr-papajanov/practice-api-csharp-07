@@ -1,4 +1,5 @@
 ﻿using Movie.Core.Entities;
+using Movie.Core.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,5 +10,8 @@ namespace Movie.Core.Abstractions.Repositories
 {
     public interface IActorRepository : IRepository<Actor>
     {
+        public void EnsureUnique(string name);
+        public void EnsureExists(int actorId);
+        Task<Actor> GetOrThrowAsync(int id);
     }
 }

@@ -11,18 +11,18 @@ namespace Movie.Services
 {
     public class ActorService : IActorService
     {
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IUnitOfWork _uow;
 
 
         public ActorService(IUnitOfWork unitOfWork)
         {
-            _unitOfWork = unitOfWork;
+            _uow = unitOfWork;
         }
 
 
         public async Task<PaginatedResult<ActorDTO>> GetAllActorsAsync(GetAllActorsDTO request)
         {
-            var query = _unitOfWork.ActorRepository.All
+            var query = _uow.ActorRepository.All
                 .Include(e => e.FilmActors)
                     .ThenInclude(e => e.Film)
                 .AsQueryable();
@@ -35,14 +35,14 @@ namespace Movie.Services
 
             return new PaginatedResult<ActorDTO>(
                 items: actors.Select(e => e.ToDTO()).ToList(),
-                totalCount: await _unitOfWork.ActorRepository.All.CountAsync(),
+                totalCount: await _uow.ActorRepository.All.CountAsync(),
                 currentPage: request.PageNumber,
                 pageSize: request.PageSize);
         }
 
         public async Task<ActorDTO> GetActorAsync(int id)
         {
-            var actor = await _unitOfWork.ActorRepository.All
+            var actor = await _uow.ActorRepository.All
                 .Include(e => e.FilmActors)
                     .ThenInclude(fa => fa.Film)
                 .FirstOrDefaultAsync(e => e.Id == id)
@@ -53,29 +53,18 @@ namespace Movie.Services
 
         public async Task AssignActorToFilmAsync(int filmId, int actorId)
         {
-            var film = await _unitOfWork.FilmRepository.All
+            var film = await _uow.FilmRepository.All
                 .Include(e => e.FilmActors)
-                .FirstOrDefaultAsync(e => e.Id == filmId);
-
-            if (film is null)
-            {
-                throw new FilmNotFoundAppException(filmId);
-            }
+                .FirstOrDefaultAsync(e => e.Id == filmId)
+                    ?? throw new FilmNotFoundAppException(filmId);
 
             if (film.FilmGenreId == (int)FilmGenres.Documentary && film.FilmActors.Count > 9)
             {
                 throw new DocumentaryFilmMaxActorsExceededAppException(filmId, 10);
             }
 
-            await EnsureActorExistsAsync(actorId);
-
-            var exists = await _unitOfWork.FilmActorRepository.All
-                .AnyAsync(e => e.FilmId == filmId && e.ActorId == actorId);
-
-            if (exists)
-            {
-                throw new ActorFilmAssignmentConflictAppException(actorId, filmId);
-            }
+            _uow.ActorRepository.EnsureExists(actorId);
+            _uow.FilmActorRepository.EnsureUnique(filmId, actorId);
 
             var filmActor = new FilmActor
             {
@@ -83,76 +72,44 @@ namespace Movie.Services
                 ActorId = actorId
             };
 
-            await _unitOfWork.FilmActorRepository.AddAsync(filmActor);
+            _uow.FilmActorRepository.Add(filmActor);
+            await _uow.CompleteAsync();
         }
 
         public async Task<ActorDTO> CreateActorAsync(CreateActorDTO request)
         {
             var actor = request.ToEntity();
 
-            await EnsureActorUniqAsync(actor.Name);
-            await _unitOfWork.ActorRepository.AddAsync(actor);
+            _uow.ActorRepository.EnsureUnique(actor.Name);
+            _uow.ActorRepository.Add(actor);
+            await _uow.CompleteAsync();
 
             return actor.ToDTO();
         }
 
         public async Task UpdateActorAsync(int id, UpdateActorDTO request)
         {
-            var actor = await _unitOfWork.ActorRepository.GetAsync(id)
-                ?? throw new ActorNotFoundAppException(id);
+            var actor = await _uow.ActorRepository.GetOrThrowAsync(id);
 
             // Update actor properties
             if (request.Name is not null)
             {
-                await EnsureActorUniqAsync(request.Name);
+                _uow.ActorRepository.EnsureUnique(actor.Name);
                 actor.Name = request.Name;
             }
 
             if (request.BirthYear is not null)
                 actor.BirthYear = (int)request.BirthYear;
 
-            await _unitOfWork.ActorRepository.UpdateAsync(actor);
+            _uow.ActorRepository.Update(actor);
+            await _uow.CompleteAsync();
         }
 
         public async Task DeleteActorAsync(int id)
         {
-            var actor = await _unitOfWork.ActorRepository.GetAsync(id)
-                ?? throw new ActorNotFoundAppException(id);
-
-            await _unitOfWork.ActorRepository.DeleteAsync(actor);
-        }
-
-        private async Task EnsureFilmExistsAsync(int filmId)
-        {
-            var exists = await _unitOfWork.FilmRepository.All
-                .AnyAsync(e => e.Id == filmId);
-
-            if (!exists)
-            {
-                throw new FilmNotFoundAppException(filmId);
-            }
-        }
-
-        private async Task EnsureActorExistsAsync(int actorId)
-        {
-            var exists = await _unitOfWork.ActorRepository.All
-                .AnyAsync(e => e.Id == actorId);
-
-            if (!exists)
-            {
-                throw new ActorNotFoundAppException(actorId);
-            }
-        }
-
-        private async Task EnsureActorUniqAsync(string name)
-        {
-            var exists = await _unitOfWork.ActorRepository.All
-                .AnyAsync(e => e.Name == name);
-
-            if (exists)
-            {
-                throw new ActorNameConflictAppException(name);
-            }
+            var actor = await _uow.ActorRepository.GetOrThrowAsync(id);
+            _uow.ActorRepository.Delete(actor);
+            await _uow.CompleteAsync();
         }
     }
 }

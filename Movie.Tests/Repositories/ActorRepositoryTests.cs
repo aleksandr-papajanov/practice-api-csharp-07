@@ -51,7 +51,7 @@ namespace Movie.Tests.Repositories
             var repository = new ActorRepository(context);
             var actor = new Actor { Name = "New Actor", BirthYear = 1990 };
 
-            await repository.AddAsync(actor);
+            await repository.Add(actor);
             await context.SaveChangesAsync();
 
             var savedActor = await context.Actors.FirstOrDefaultAsync(a => a.Name == "New Actor");

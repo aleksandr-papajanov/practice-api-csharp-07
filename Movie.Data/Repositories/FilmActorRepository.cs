@@ -1,5 +1,6 @@
 ﻿using Movie.Core.Abstractions.Repositories;
 using Movie.Core.Entities;
+using Movie.Core.Exceptions;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,6 +13,14 @@ namespace Movie.Data.Repositories
     {
         public FilmActorRepository(AppDbContext context) : base(context)
         {
+        }
+
+        public void EnsureUnique(int filmId, int actorId)
+        {
+            if (_set.Any(e => e.FilmId == filmId && e.ActorId == actorId))
+            {
+                throw new ActorFilmAssignmentConflictAppException(actorId, filmId);
+            }
         }
     }
 }
