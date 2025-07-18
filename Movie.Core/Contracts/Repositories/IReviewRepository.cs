@@ -10,7 +10,7 @@ namespace Movie.Core.Contracts.Repositories
     public interface IReviewRepository : IRepository<Review>
     {
         void EnsureExists(int filmId);
-        void EnsureIsNotContributed(int filmId, string reviewer);
+        void EnsureIsNotContributed(int filmId, string reviewer, int? ignoreId = null);
         Task<Review> GetOrThrowAsync(int id);
     }
 }

@@ -69,6 +69,7 @@ namespace Movie.Services
         public async Task<FilmDetailsDTO> GetFilmDetailsAsync(int id)
         {
             var film = await _uow.FilmRepository.All
+                .Include(e => e.FilmGenre)
                 .Include(e => e.Details)
                 .Include(e => e.FilmActors)
                     .ThenInclude(e => e.Actor)

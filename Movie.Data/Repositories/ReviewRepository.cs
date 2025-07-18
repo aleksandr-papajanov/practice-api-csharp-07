@@ -24,10 +24,11 @@ namespace Movie.Data.Repositories
             }
         }
 
-        public void EnsureIsNotContributed(int filmId, string reviewer)
+        public void EnsureIsNotContributed(int filmId, string reviewer, int? ignoreId = null)
         {
-            if (!_set.Any(e => e.FilmId == filmId &&
-                               e.ReviewerName == reviewer))
+            if (_set.Any(e => e.FilmId == filmId &&
+                               e.ReviewerName == reviewer &&
+                               (ignoreId == null || e.Id != ignoreId)))
             {
                 throw new ReviewerContributionConflictAppException(reviewer, filmId);
             }

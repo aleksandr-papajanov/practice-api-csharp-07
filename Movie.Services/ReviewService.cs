@@ -42,7 +42,10 @@ namespace Movie.Services
             var review = await _uow.ReviewRepository.GetOrThrowAsync(id);
 
             if (request.ReviewerName is not null)
+            {
+                _uow.ReviewRepository.EnsureIsNotContributed(review.FilmId, request.ReviewerName, id);
                 review.ReviewerName = request.ReviewerName;
+            }
 
             if (request.Comment is not null)
                 review.Comment = request.Comment;
