@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Movie.API.Services;
 using Movie.Contracts;
 using Movie.Core.Abstractions;
 using Movie.Core.Abstractions.Repositories;
@@ -50,6 +51,12 @@ namespace Movie.API.Extentions
             services.AddScoped(provider => new Lazy<IReviewService>(() => provider.GetRequiredService<IReviewService>()));
 
             services.AddScoped<IServiceManager, ServiceManager>();
+        }
+
+        public static void AddHostedServices(this IServiceCollection services)
+        {
+            services.AddHostedService<DataSeedingService>();
+            services.AddHostedService<ReviewCleanupService>();
         }
     }
 }

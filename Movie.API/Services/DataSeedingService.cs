@@ -22,19 +22,19 @@ namespace Movie.API.Services
         private const int DefaultGenreCount = 10;
         private const int MaxRetries = 20;
 
-        private readonly IServiceProvider _serviceProvider;
+        private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<DataSeedingService> _logger;
         private AppDbContext _context;
 
-        public DataSeedingService(IServiceProvider serviceProvider, ILogger<DataSeedingService> logger)
+        public DataSeedingService(IServiceScopeFactory scopeFactory, ILogger<DataSeedingService> logger)
         {
-            _serviceProvider = serviceProvider;
+            _scopeFactory = scopeFactory;
             _logger = logger;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
-            using var scope = _serviceProvider.CreateScope();
+            using var scope = _scopeFactory.CreateScope();
 
             var env = scope.ServiceProvider.GetRequiredService<IWebHostEnvironment>();
             if (!env.IsDevelopment()) return;

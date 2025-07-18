@@ -10,7 +10,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddAppDbContext(builder.Configuration);
 builder.Services.AddRepositories();
 builder.Services.AddServices();
-builder.Services.AddHostedService<DataSeedingService>();
+builder.Services.AddHostedServices();
 
 builder.Services.AddControllers(setup =>
 {
