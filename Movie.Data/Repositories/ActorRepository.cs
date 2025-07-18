@@ -13,12 +13,12 @@ namespace Movie.Data.Repositories
         public async Task<Actor> GetOrThrowAsync(int id)
         {
             return await base.GetAsync(id)
-                ?? throw new ReviewNotFoundAppException(id);
+                ?? throw new ActorNotFoundAppException(id);
         }
 
-        public void EnsureUnique(string name)
+        public void EnsureUnique(string name, int? ignoreId = null)
         {
-            if (_set.Any(e => e.Name == name))
+            if (_set.Any(e => e.Name == name && (ignoreId == null || e.Id != ignoreId)))
             {
                 throw new ActorNameConflictAppException(name);
             }

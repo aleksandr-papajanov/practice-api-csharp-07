@@ -10,6 +10,6 @@ namespace Movie.Core.Contracts.Repositories
     public interface IFilmRepository : IRepository<Film>
     {
         void EnsureExists(int filmId);
-        void EnsureUnique(string title);
+        void EnsureUnique(string title, int? ignoreId = null);
     }
 }

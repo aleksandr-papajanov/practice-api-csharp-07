@@ -10,7 +10,7 @@ namespace Movie.Core.Contracts.Repositories
 {
     public interface IActorRepository : IRepository<Actor>
     {
-        public void EnsureUnique(string name);
+        public void EnsureUnique(string name, int? ignoreId = null);
         public void EnsureExists(int actorId);
         Task<Actor> GetOrThrowAsync(int id);
     }

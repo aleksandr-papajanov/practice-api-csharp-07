@@ -41,6 +41,8 @@ namespace Movie.Services
                     .Where(e => e.FilmActors.Any(e =>
                         e.Actor.Name.ToLower().Contains(request.Actor.ToLower()))); // StringComparison here is not available in EF Core LINQ
 
+            var totalCount = await query.CountAsync();
+
             query = query
                 .Skip((request.PageNumber - 1) * request.PageSize)
                 .Take(request.PageSize);
@@ -49,7 +51,7 @@ namespace Movie.Services
 
             return new PaginatedResult<FilmDTO>(
                 items: films.Select(e => e.ToDTO()).ToList(),
-                totalCount: await query.CountAsync(),
+                totalCount: totalCount,
                 currentPage: request.PageNumber,
                 pageSize: request.PageSize);
         }
@@ -103,7 +105,7 @@ namespace Movie.Services
             // Update film properties
             if (request.Title is not null)
             {
-                _uow.FilmRepository.EnsureUnique(request.Title);
+                _uow.FilmRepository.EnsureUnique(request.Title, id);
                 film.Title = request.Title;
             }
 

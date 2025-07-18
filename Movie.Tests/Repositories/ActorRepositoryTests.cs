@@ -51,7 +51,7 @@ namespace Movie.Tests.Repositories
             var repository = new ActorRepository(context);
             var actor = new Actor { Name = "New Actor", BirthYear = 1990 };
 
-            await repository.Add(actor);
+            repository.Add(actor);
             await context.SaveChangesAsync();
 
             var savedActor = await context.Actors.FirstOrDefaultAsync(a => a.Name == "New Actor");
@@ -69,7 +69,7 @@ namespace Movie.Tests.Repositories
             await context.SaveChangesAsync();
 
             actor.Name = "Updated Name";
-            await repository.UpdateAsync(actor);
+            repository.Update(actor);
             await context.SaveChangesAsync();
 
             var updatedActor = await context.Actors.FindAsync(1);
@@ -85,7 +85,7 @@ namespace Movie.Tests.Repositories
             context.Actors.Add(actor);
             await context.SaveChangesAsync();
 
-            await repository.DeleteAsync(actor);
+            repository.Delete(actor);
             await context.SaveChangesAsync();
 
             var deletedActor = await context.Actors.FindAsync(1);

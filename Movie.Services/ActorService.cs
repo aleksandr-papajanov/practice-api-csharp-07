@@ -27,6 +27,8 @@ namespace Movie.Services
                     .ThenInclude(e => e.Film)
                 .AsQueryable();
 
+            var totalCount = await query.CountAsync();
+
             query = query
                 .Skip((request.PageNumber - 1) * request.PageSize)
                 .Take(request.PageSize);
@@ -35,7 +37,7 @@ namespace Movie.Services
 
             return new PaginatedResult<ActorDTO>(
                 items: actors.Select(e => e.ToDTO()).ToList(),
-                totalCount: await query.CountAsync(),
+                totalCount: totalCount,
                 currentPage: request.PageNumber,
                 pageSize: request.PageSize);
         }
@@ -94,7 +96,7 @@ namespace Movie.Services
             // Update actor properties
             if (request.Name is not null)
             {
-                _uow.ActorRepository.EnsureUnique(actor.Name);
+                _uow.ActorRepository.EnsureUnique(actor.Name, id);
                 actor.Name = request.Name;
             }
 

@@ -18,9 +18,9 @@ namespace Movie.Data.Repositories
             }
         }
 
-        public void EnsureUnique(string title)
+        public void EnsureUnique(string title, int? ignoreId = null)
         {
-            if (_set.Any(e => e.Title == title))
+            if (_set.Any(e => e.Title == title && (ignoreId == null || e.Id != ignoreId)))
             {
                 throw new FilmTitleConflictAppException(title);
             }
