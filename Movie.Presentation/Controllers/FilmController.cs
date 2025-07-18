@@ -10,7 +10,7 @@ namespace Movie.API.Controllers
     /// <summary>
     /// Controller for managing movies and retrieving movie details.
     /// </summary>
-    [Route("api/movies")]
+    [Route("api/films")]
     [ApiController]
     [Produces("application/json")]
     public class FilmController : ControllerBase
@@ -120,7 +120,7 @@ namespace Movie.API.Controllers
         /// <returns>No content if the update is successful.</returns>
         [HttpPatch("{id}")]
         [Consumes("application/json-patch+json")]
-        public async Task<IActionResult> PatchFilm(int id, JsonPatchDocument<UpdateFilmDTO> patchDocument)
+        public async Task<IActionResult> PatchFilm(int id, [FromBody] JsonPatchDocument<UpdateFilmDTO> patchDocument)
         {
             await _manager.FilmService.UpdateFilmWithPatchDocumentAsync(id, patchDocument);
             return NoContent();
