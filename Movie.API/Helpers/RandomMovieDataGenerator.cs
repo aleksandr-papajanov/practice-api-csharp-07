@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Movie.Core.Entities;
 using System;
 
 namespace Movie.API.Helpers
@@ -12,7 +13,6 @@ namespace Movie.API.Helpers
         private static readonly string[] FilmTitleAdjectives = { "Dark", "Silent", "Broken", "Hidden", "Last", "First", "Red", "Golden", "Eternal", "Secret" };
         private static readonly string[] FilmTitleNouns = { "Empire", "Dream", "Memory", "Warrior", "Forest", "Shadow", "Game", "Promise", "Ocean", "Fire" };
         private static readonly string[] FilmTitleModifiers = { "of Time", "Returns", "Awakens", "Rising", "Legacy", "Chronicles", "Reborn", "Fury", "Beyond", "Revenge" };
-        private static readonly string[] FilmGenres = { "Action", "Comedy", "Drama", "Horror", "Sci-Fi", "Romance", "Thriller", "Fantasy", "Animation", "Mystery", "Documentary", "Adventure", "Crime", "Musical", "Western" };
         private static readonly string[] Languages = { "English", "Spanish", "French", "German", "Japanese", "Swedish", "Italian", "Chinese", "Korean", "Hindi" };
         private static readonly string[] ReviewOpenings = { "Absolutely loved it.", "Not what I expected.", "A pleasant surprise.", "Could have been better.", "An instant classic.", "Left me speechless." };
         private static readonly string[] ReviewMiddles = { "The acting was top-notch.", "The story kept me engaged.", "Visuals were stunning.", "The pacing felt off at times.", "Music fit the scenes perfectly.", "Dialogues were a bit weak." };
@@ -62,9 +62,9 @@ namespace Movie.API.Helpers
 
         public static string Review => string.Join(" ", Pick(ReviewOpenings), Pick(ReviewMiddles), Pick(ReviewEndings));
         public static string Synopsis => string.Join(" ", Pick(SynopsisOpenings), Pick(SynopsisMiddles), Pick(SynopsisEndings));
-        public static string Genre => Pick(FilmGenres);
+        public static FilmGenres Genre => Pick(Enum.GetValues<FilmGenres>());
         public static string Language => Pick(Languages);
 
-        private static string Pick(string[] array) => array[_random.Next(array.Length)];
+        private static T Pick<T>(T[] array) => array[_random.Next(array.Length)];
     }
 }

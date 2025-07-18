@@ -48,7 +48,20 @@ namespace Movie.Services
 
         public async Task AssignActorToFilmAsync(int filmId, int actorId)
         {
-            await EnsureFilmExistsAsync(filmId);
+            var film = await _unitOfWork.FilmRepository.All
+                .Include(e => e.FilmActors)
+                .FirstOrDefaultAsync(e => e.Id == filmId);
+
+            if (film is null)
+            {
+                throw new FilmNotFoundAppException(filmId);
+            }
+
+            if (film.FilmGenreId == (int)FilmGenres.Documentary && film.FilmActors.Count > 9)
+            {
+                throw new DocumentaryFilmMaxActorsExceededAppException(filmId, 10);
+            }
+
             await EnsureActorExistsAsync(actorId);
 
             var exists = await _unitOfWork.FilmActorRepository.All

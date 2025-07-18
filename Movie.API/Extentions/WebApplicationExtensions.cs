@@ -5,7 +5,6 @@ using Movie.Core.Abstractions;
 using Movie.Core.Abstractions.Repositories;
 using Movie.Data;
 using Movie.Data.Repositories;
-using Movie.Data.Seeder;
 using Movie.Services;
 
 namespace Movie.API.Extentions

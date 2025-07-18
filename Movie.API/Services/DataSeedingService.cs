@@ -18,9 +18,6 @@ namespace Movie.API.Services
     {
         private const int DefaultMovieCount = 100;
         private const int DefaultActorCount = 50;
-        private const int DefaultReviewCount = 1000;
-        private const int DefaultGenreCount = 10;
-        private const int MaxRetries = 20;
 
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly ILogger<DataSeedingService> _logger;
@@ -59,12 +56,12 @@ namespace Movie.API.Services
 
         private async Task AddFilm()
         {
-            var genre = await GetRandomGenre();
+            var genre = RandomMovieDataGenerator.Genre;
 
             Faker<Film> faker = new Faker<Film>("en").Rules((f, e) =>
             {
                 e.Title = RandomMovieDataGenerator.FilmTitle;
-                e.FilmGenre = genre;
+                e.FilmGenreId = (int)genre;
                 e.Year = RandomMovieDataGenerator.Year;
                 e.Duration = f.Random.Int(40, 241);
                 e.Details = new FilmDetails
@@ -72,7 +69,7 @@ namespace Movie.API.Services
                     FilmId = e.Id, // This will be set after saving the film
                     Synopsis = RandomMovieDataGenerator.Synopsis,
                     Language = RandomMovieDataGenerator.Language,
-                    Budget = genre.Name == "Documentary"
+                    Budget = genre == FilmGenres.Documentary
                         ? f.Random.Decimal(955, 1_000_000_000_000)
                         : f.Random.Decimal(955, 1_000_000_000)
                 };
@@ -84,7 +81,7 @@ namespace Movie.API.Services
             _context.SaveChanges();
 
             Random rnd = new Random();
-            var actorCount = genre.Name == "Documentary"
+            var actorCount = genre == FilmGenres.Documentary
                 ? rnd.Next(0, 10 + 1)
                 : rnd.Next(0, 15 + 1);
 
@@ -148,37 +145,6 @@ namespace Movie.API.Services
             return true;
         }
 
-
-        private async Task<FilmGenre> GetRandomGenre()
-        {
-            // To avoid too many options we will limit the number of genres
-            if (_context.FilmGenres.Count() > DefaultGenreCount)
-            {
-                var randomGenre = await _context.FilmGenres
-                    .OrderBy(x => Guid.NewGuid())
-                    .FirstAsync();
-
-                return randomGenre;
-            }
-
-            var genreName = RandomMovieDataGenerator.Genre;
-
-            var existing = await _context.FilmGenres.FirstOrDefaultAsync(x => x.Name == genreName);
-            if (existing != null)
-            {
-                return existing;
-            }
-
-            var genreEntity = new FilmGenre
-            {
-                Name = genreName
-            };
-
-            _context.FilmGenres.Add(genreEntity);
-            _context.SaveChanges();
-
-            return genreEntity;
-        }
 
         private async Task<Actor> GetRandomActor()
         {

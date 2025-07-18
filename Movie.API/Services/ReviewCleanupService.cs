@@ -1,8 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Movie.Contracts;
 using Movie.Core.Abstractions;
-using Movie.Core.Abstractions.Repositories;
-using Movie.Core.Entities;
 
 namespace Movie.API.Services
 {
