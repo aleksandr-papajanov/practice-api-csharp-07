@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace Movie.Services.Exceptions
+namespace Movie.Core.Exceptions
 {
     public abstract class NotFoundAppException : AppExceptionBase
     {

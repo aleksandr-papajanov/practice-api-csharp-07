@@ -1,10 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.EntityFrameworkCore;
+using Movie.API.Helpers;
 using Movie.Contracts;
 using Movie.Core.Abstractions;
 using Movie.Core.DTOs.Common;
 using Movie.Core.DTOs.Films;
 using Movie.Core.Entities;
-using Movie.Services.Exceptions;
+using Movie.Core.Exceptions;
 using Movie.Services.Mappers;
 
 namespace Movie.Services
@@ -54,8 +56,10 @@ namespace Movie.Services
 
         public async Task<FilmDTO> GetFilmAsync(int id)
         {
-            var film = await _unitOfWork.FilmRepository.GetAsync(id)
-                ?? throw new FilmNotFoundAppException(id);
+            var film = await _unitOfWork.FilmRepository.All
+                .Include(e => e.FilmGenre)
+                .FirstOrDefaultAsync(e => e.Id == id)
+                    ?? throw new FilmNotFoundAppException(id);
 
             return film.ToDTO();
         }
@@ -155,6 +159,19 @@ namespace Movie.Services
 
                 await _unitOfWork.FilmDetailsRepository.UpdateAsync(film.Details);
             }
+        }
+
+        public async Task UpdateFilmWithPatchDocumentAsync(int id, JsonPatchDocument<UpdateFilmDTO> patchDocument)
+        {
+            if (patchDocument is null)
+                throw new PatchDocumentNullAppException();
+
+            var dto = new UpdateFilmDTO();
+            patchDocument.ApplyTo(dto);
+
+            ValidationHelper.ValidateDto(dto);
+
+            await UpdateFilmAsync(id, dto);
         }
 
         public async Task DeleteFilmAsync(int id)

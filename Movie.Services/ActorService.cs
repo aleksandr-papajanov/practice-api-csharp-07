@@ -4,7 +4,7 @@ using Movie.Core.Abstractions;
 using Movie.Core.DTOs.Actors;
 using Movie.Core.DTOs.Common;
 using Movie.Core.Entities;
-using Movie.Services.Exceptions;
+using Movie.Core.Exceptions;
 using Movie.Services.Mappers;
 
 namespace Movie.Services

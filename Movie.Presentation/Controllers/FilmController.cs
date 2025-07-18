@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
 using Movie.Contracts;
 using Movie.Core.DTOs;
@@ -110,6 +111,19 @@ namespace Movie.API.Controllers
             await _manager.FilmService.DeleteFilmAsync(id);
             return NoContent();
         }
-    }
 
+        /// <summary>
+        /// Partially updates a film using a JSON Patch document.
+        /// </summary>
+        /// <param name="id">The ID of the film to update.</param>
+        /// <param name="patchDocument">The JSON Patch document containing the update operations.</param>
+        /// <returns>No content if the update is successful.</returns>
+        [HttpPatch("{id}")]
+        [Consumes("application/json-patch+json")]
+        public async Task<IActionResult> PatchFilm(int id, JsonPatchDocument<UpdateFilmDTO> patchDocument)
+        {
+            await _manager.FilmService.UpdateFilmWithPatchDocumentAsync(id, patchDocument);
+            return NoContent();
+        }
+    }
 }

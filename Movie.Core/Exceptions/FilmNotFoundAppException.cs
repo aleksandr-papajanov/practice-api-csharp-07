@@ -1,4 +1,4 @@
-﻿namespace Movie.Services.Exceptions
+﻿namespace Movie.Core.Exceptions
 {
     public class FilmNotFoundAppException : NotFoundAppException
     {

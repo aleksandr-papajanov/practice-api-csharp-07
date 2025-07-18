@@ -1,4 +1,5 @@
-﻿using Movie.Core.DTOs.Common;
+﻿using Microsoft.AspNetCore.JsonPatch;
+using Movie.Core.DTOs.Common;
 using Movie.Core.DTOs.Films;
 
 namespace Movie.Contracts
@@ -11,5 +12,6 @@ namespace Movie.Contracts
         Task<FilmDTO> CreateFilmAsync(CreateFilmDTO request);
         Task UpdateFilmAsync(int id, UpdateFilmDTO request);
         Task DeleteFilmAsync(int id);
+        Task UpdateFilmWithPatchDocumentAsync(int id, JsonPatchDocument<UpdateFilmDTO> patchDocument);
     }
 }

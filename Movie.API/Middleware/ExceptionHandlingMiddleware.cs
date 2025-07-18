@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
-using Movie.Services.Exceptions;
+using Movie.Core.Exceptions;
 using Movie.Services.Mappers;
 using System.Net.Http;
 using System.Text.Json;

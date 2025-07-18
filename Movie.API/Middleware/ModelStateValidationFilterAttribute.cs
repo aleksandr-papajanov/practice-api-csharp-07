@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Movie.Services.Exceptions;
+using Movie.API.Helpers;
+using Movie.Core.Exceptions;
 
 namespace Movie.API.Middleware
 {
@@ -10,31 +10,9 @@ namespace Movie.API.Middleware
         {
             if (!context.ModelState.IsValid)
             {
-                var errors = GetErrors(context.ModelState);
+                var errors = ValidationHelper.GetErrors(context.ModelState);
                 throw new ValidationAppException(errors);
             }
-        }
-
-        private Dictionary<string, ICollection<string>> GetErrors(ModelStateDictionary modelState)
-        {
-            var collection = new Dictionary<string, ICollection<string>>();
-
-            foreach (var state in modelState)
-            {
-                if (!state.Value.Errors.Any())
-                {
-                    continue;
-                }
-
-                collection.Add(
-                    state.Key,
-                    state.Value.Errors
-                        .Select(x => x.ErrorMessage)
-                        .ToList());
-
-            }
-
-            return collection;
         }
     }
 }

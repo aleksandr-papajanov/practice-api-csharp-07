@@ -1,9 +1,7 @@
 ﻿using Movie.API.Extentions;
 using Movie.API.Middleware;
-using Movie.API.Services;
 using Movie.Core;
 using Movie.Presentation;
-using Movie.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +15,7 @@ builder.Services.AddControllers(setup =>
     // Add custom middleware for model validation
     setup.Filters.Add<ModelStateValidationFilterAttribute>();
 })
+    .AddNewtonsoftJson()
     .ConfigureApiBehaviorOptions(setup =>
     {
         // For custom model validation to work

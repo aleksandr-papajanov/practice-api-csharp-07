@@ -28,6 +28,17 @@ namespace Movie.Services.Mappers
             Reviews = entity.Reviews.Select(e => e.ToDTO())
         };
 
+        public static UpdateFilmDTO ToUpdateDTO(this Film entity) => new UpdateFilmDTO
+        {
+            Title = entity.Title,
+            Genre = entity.FilmGenre.Name,
+            Year = entity.Year,
+            Duration = entity.Duration,
+            Synopsis = entity.Details.Synopsis,
+            Language = entity.Details.Language,
+            Budget = entity.Details.Budget
+        };
+
         public static Film ToEntity(this CreateFilmDTO dto) => new Film
         {
             Title = dto.Title,

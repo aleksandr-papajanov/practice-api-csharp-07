@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Http;
 
-namespace Movie.Services.Exceptions
+namespace Movie.Core.Exceptions
 {
     public class ValidationAppException : AppExceptionBase
     {
-        public ValidationAppException(Dictionary<string, ICollection<string>> errors) : base("Validation failed for the request.")
+        public ValidationAppException(Dictionary<string, List<string>> errors) : base("Validation failed for the request.")
         {
             Details = errors;
             StatusCode = StatusCodes.Status400BadRequest;
