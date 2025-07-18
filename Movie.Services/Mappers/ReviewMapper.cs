@@ -1,7 +1,7 @@
 ﻿using Movie.Core.DTOs.Reviews;
 using Movie.Core.Entities;
 
-namespace Movie.Core.DTOs.Mappers
+namespace Movie.Services.Mappers
 {
     public static class ReviewMapper
     {

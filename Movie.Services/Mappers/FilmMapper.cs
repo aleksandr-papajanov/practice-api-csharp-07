@@ -1,7 +1,7 @@
 ﻿using Movie.Core.DTOs.Films;
 using Movie.Core.Entities;
 
-namespace Movie.Core.DTOs.Mappers
+namespace Movie.Services.Mappers
 {
     public static class FilmMapper
     {
@@ -9,7 +9,7 @@ namespace Movie.Core.DTOs.Mappers
         {
             Id = entity.Id,
             Title = entity.Title,
-            Genre = entity.Genre,
+            Genre = entity.FilmGenre.Name,
             Year = entity.Year,
             Duration = entity.Duration
         };
@@ -18,7 +18,7 @@ namespace Movie.Core.DTOs.Mappers
         {
             Id = entity.Id,
             Title = entity.Title,
-            Genre = entity.Genre,
+            Genre = entity.FilmGenre.Name,
             Year = entity.Year,
             Duration = entity.Duration,
             Synopsis = entity.Details.Synopsis,
@@ -31,7 +31,6 @@ namespace Movie.Core.DTOs.Mappers
         public static Film ToEntity(this CreateFilmDTO dto) => new Film
         {
             Title = dto.Title,
-            Genre = dto.Genre,
             Year = dto.Year,
             Duration = dto.Duration
         };

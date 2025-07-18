@@ -1,10 +1,10 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Movie.Contracts.Services;
+using Movie.Contracts;
 using Movie.Core.Abstractions;
 using Movie.Core.DTOs.Films;
-using Movie.Core.DTOs.Mappers;
 using Movie.Core.Entities;
-using Movie.Core.Exceptions;
+using Movie.Services.Exceptions;
+using Movie.Services.Mappers;
 
 namespace Movie.Services
 {
@@ -24,10 +24,11 @@ namespace Movie.Services
             var query = _unitOfWork.FilmRepository.All
                 .Include(e => e.FilmActors)
                     .ThenInclude(e => e.Actor)
+                .Include(e => e.FilmGenre)
                 .AsQueryable();
 
             if (!string.IsNullOrWhiteSpace(request.Genre))
-                query = query.Where(e => e.Genre == request.Genre);
+                query = query.Where(e => e.FilmGenre.Name == request.Genre);
 
             if (request.Year is not null)
                 query = query.Where(e => e.Year == request.Year);
@@ -41,126 +42,145 @@ namespace Movie.Services
                 .Skip(request.Skip)
                 .Take(request.Take);
 
-            var movies = await query.ToListAsync();
+            var films = await query.ToListAsync();
 
-            return movies.Select(e => e.ToDTO()).ToList();
+            return films.Select(e => e.ToDTO()).ToList();
         }
 
         public async Task<FilmDTO> GetFilmAsync(int id)
         {
-            var movie = await _unitOfWork.FilmRepository.GetAsync(id)
-                ?? throw new NotFoundAppException($"Movie with ID {id} not found.");
+            var film = await _unitOfWork.FilmRepository.GetAsync(id)
+                ?? throw new FilmNotFoundAppException(id);
 
-            return movie.ToDTO();
+            return film.ToDTO();
         }
 
         public async Task<FilmDetailsDTO> GetFilmDetailsAsync(int id)
         {
-            var movie = await _unitOfWork.FilmRepository.All
+            var film = await _unitOfWork.FilmRepository.All
                 .Include(e => e.Details)
                 .Include(e => e.FilmActors)
                     .ThenInclude(e => e.Actor)
                 .Include(e => e.Reviews)
                 .Where(e => e.Id == id)
                 .FirstOrDefaultAsync()
-                    ?? throw new NotFoundAppException($"Movie with ID {id} not found.");
+                    ?? throw new FilmNotFoundAppException(id);
 
-            return movie.ToDetailsDTO();
+            return film.ToDetailsDTO();
         }
 
         public async Task<FilmDTO> CreateFilmAsync(CreateFilmDTO request)
         {
-            var movie = request.ToEntity();
+            var film = request.ToEntity();
             var details = request.ToDetailsEntity();
 
-            await EnsureMovieUniqAsync(movie.Title);
-            await _unitOfWork.FilmRepository.AddAsync(movie);
+            // Ensure the genre exists
+            var genre = await FindGenreAsync(request.Genre);
+            film.FilmGenre = genre;
 
-            // Ensure that the details are linked to the movie and save
-            details.FilmId = movie.Id;
+            await EnsureFilmUniqAsync(film.Title);
+            await _unitOfWork.FilmRepository.AddAsync(film);
+
+            // Ensure that the details are linked to the film and save
+            details.FilmId = film.Id;
             await _unitOfWork.FilmDetailsRepository.AddAsync(details);
 
-            return movie.ToDTO();
+            return film.ToDTO();
         }
 
         public async Task UpdateFilmAsync(int id, UpdateFilmDTO request)
         {
-            var movie = await _unitOfWork.FilmRepository.All
+            var film = await _unitOfWork.FilmRepository.All
                 .Include(e => e.Details)
                 .FirstOrDefaultAsync(e => e.Id == id)
-                    ?? throw new NotFoundAppException($"Movie with ID {id} not found.");
+                    ?? throw new FilmNotFoundAppException(id);
 
-            // Update movie properties
+            // Update film properties
             if (request.Title is not null)
             {
-                await EnsureMovieUniqAsync(request.Title);
-                movie.Title = request.Title;
+                await EnsureFilmUniqAsync(request.Title);
+                film.Title = request.Title;
             }
 
             if (request.Genre is not null)
-                movie.Genre = request.Genre;
+            {
+                var genre = await FindGenreAsync(request.Genre);
+                film.FilmGenre = genre;
+            }
 
             if (request.Year.HasValue)
-                movie.Year = request.Year.Value;
+                film.Year = request.Year.Value;
 
             if (request.Duration.HasValue)
-                movie.Duration = request.Duration.Value;
+                film.Duration = request.Duration.Value;
 
-            await _unitOfWork.FilmRepository.UpdateAsync(movie);
+            await _unitOfWork.FilmRepository.UpdateAsync(film);
 
-            // Update movie details
-            if (movie.Details is null)
+            // Update film details
+            if (film.Details is null)
             {
                 // Create new details if they don't exist
                 if (request.Synopsis is null || request.Language is null || request.Budget is null)
                 {
-                    throw new BadRequestAppException("All details must be provided when initializing movie details.");
+                    throw new FilmDetailsNotProvidedAppException();
                 }
 
                 var details = new FilmDetails
                 {
-                    FilmId = movie.Id,
+                    FilmId = film.Id,
                     Synopsis = request.Synopsis,
                     Language = request.Language,
                     Budget = request.Budget.Value
                 };
 
-                movie.Details = details;
+                film.Details = details;
                 await _unitOfWork.FilmDetailsRepository.AddAsync(details);
             }
             else
             {
                 // Update existing details
                 if (request.Synopsis is not null)
-                    movie.Details.Synopsis = request.Synopsis;
+                    film.Details.Synopsis = request.Synopsis;
 
                 if (request.Language is not null)
-                    movie.Details.Language = request.Language;
+                    film.Details.Language = request.Language;
 
                 if (request.Budget.HasValue)
-                    movie.Details.Budget = request.Budget.Value;
+                    film.Details.Budget = request.Budget.Value;
 
-                await _unitOfWork.FilmDetailsRepository.UpdateAsync(movie.Details);
+                await _unitOfWork.FilmDetailsRepository.UpdateAsync(film.Details);
             }
         }
 
         public async Task DeleteFilmAsync(int id)
         {
-            var movie = await _unitOfWork.FilmRepository.All
+            var film = await _unitOfWork.FilmRepository.All
                 .FirstOrDefaultAsync(e => e.Id == id)
-                    ?? throw new NotFoundAppException($"Movie with ID {id} not found.");
+                    ?? throw new FilmNotFoundAppException(id);
 
-            await _unitOfWork.FilmRepository.DeleteAsync(movie);
+            await _unitOfWork.FilmRepository.DeleteAsync(film);
         }
 
-        private async Task EnsureMovieUniqAsync(string title)
+        private async Task EnsureFilmUniqAsync(string title)
         {
             var exists = await _unitOfWork.FilmRepository.All.AnyAsync(e => e.Title == title);
 
             if (exists)
             {
-                throw new BadRequestAppException($"Movie with title '{title}' already exists.");
+                throw new FilmTitleConflictAppException(title);
             }
+        }
+        
+        private async Task<FilmGenre> FindGenreAsync(string genre)
+        {
+            var exists = await _unitOfWork.FilmGenreRepository.All.FirstOrDefaultAsync(e => e.Name == genre);
+
+            if (exists == null)
+            {
+                throw new GenreNotExistsAppException(genre);
+            }
+
+            return exists;
         }
     }
 }

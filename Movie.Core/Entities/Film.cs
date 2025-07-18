@@ -6,10 +6,15 @@ namespace Movie.Core.Entities
     {
         public int Id { get; set; }
         public required string Title { get; set; }
-        public required string Genre { get; set; }
         public int Year { get; set; }
         public int Duration { get; set; }
         public FilmDetails Details { get; set; } = null!;
+
+        // Foreign Keys
+        public int FilmGenreId { get; set; }
+
+        // Navigation Properties
+        public FilmGenre FilmGenre { get; set; } = null!;
         public ICollection<Review> Reviews { get; set; } = [];
         public ICollection<FilmActor> FilmActors { get; set; } = [];
 

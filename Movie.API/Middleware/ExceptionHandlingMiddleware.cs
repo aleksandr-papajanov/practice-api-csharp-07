@@ -1,5 +1,10 @@
-﻿using Movie.Core.DTOs.Mappers;
-using Movie.Core.Exceptions;
+﻿using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Movie.Services.Exceptions;
+using Movie.Services.Mappers;
+using System.Net.Http;
 using System.Text.Json;
 
 namespace Movie.API.Middleware
@@ -8,11 +13,13 @@ namespace Movie.API.Middleware
     {
         private readonly RequestDelegate _next;
         private readonly ILogger<ExceptionHandlingMiddleware> _logger;
+        private readonly ProblemDetailsFactory _problemDetailsFactory;
 
-        public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
+        public ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger, ProblemDetailsFactory problemDetailsFactory)
         {
             _next = next;
             _logger = logger;
+            _problemDetailsFactory = problemDetailsFactory;
         }
 
         public async Task InvokeAsync(HttpContext httpContext)
@@ -23,34 +30,46 @@ namespace Movie.API.Middleware
             {
                 await _next(httpContext);
             }
-            catch (NotFoundAppException ex)
-            {
-                await WriteErrorResponseAsync(httpContext, ex);
-            }
-            catch (BadRequestAppException ex)
-            {
-                await WriteErrorResponseAsync(httpContext, ex);
-            }
             catch (ValidationAppException ex)
             {
-                await WriteErrorResponseAsync(httpContext, ex);
+                var problem = CreateProblem(ex, httpContext);
+                problem.Extensions["errors"] = ex.Details; // Add validation errors to the problem details
+                await WriteErrorResponseAsync(problem, httpContext);
+            }
+            catch (AppExceptionBase ex)
+            {
+                var problem = CreateProblem(ex, httpContext);
+                await WriteErrorResponseAsync(problem, httpContext);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "An unexpected error occurred.");
 
-                await WriteErrorResponseAsync(httpContext, new AppExceptionBase());
+                var problem = _problemDetailsFactory.CreateProblemDetails(
+                    httpContext: httpContext,
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    title: "Internal Server Error",
+                    detail: "An unexpected error occurred.",
+                    instance: httpContext.Request.Path);
+
+                await WriteErrorResponseAsync(problem, httpContext);
             }
         }
 
-        private async Task WriteErrorResponseAsync(HttpContext context, AppExceptionBase ex)
+        private async Task WriteErrorResponseAsync(ProblemDetails problem, HttpContext context)
         {
-            context.Response.StatusCode = ex.StatusCode;
-            context.Response.ContentType = "application/json";
+            context.Response.StatusCode = problem.Status ?? StatusCodes.Status500InternalServerError;
+            await context.Response.WriteAsJsonAsync(problem);
+        }
 
-            var json = JsonSerializer.Serialize(ex.ToDTO());
-
-            await context.Response.WriteAsync(json);
+        private ProblemDetails CreateProblem(AppExceptionBase ex, HttpContext context)
+        {
+            return _problemDetailsFactory.CreateProblemDetails(
+                httpContext: context,
+                statusCode: ex.StatusCode,
+                title: ex.Title,
+                detail: ex.Message,
+                instance: context.Request.Path);
         }
     }
 }

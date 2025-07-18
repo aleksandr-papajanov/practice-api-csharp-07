@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Movie.Contracts.Services;
+using Movie.Contracts;
 using Movie.Core.DTOs;
 using Movie.Core.DTOs.Actors;
 
@@ -14,14 +14,14 @@ namespace Movie.API.Controllers
     [Produces("application/json")]
     public class ActorController : ControllerBase
     {
-        private readonly IActorService _service;
+        private readonly IServiceManager _manager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ActorController"/>.
         /// </summary>
-        public ActorController(IActorService service)
+        public ActorController(IServiceManager manager)
         {
-            _service = service;
+            _manager = manager;
         }
 
         /// <summary>
@@ -31,10 +31,10 @@ namespace Movie.API.Controllers
         /// <returns>A list of actors.</returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<ActorDTO>))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ExceptionDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
         public async Task<ActionResult<IEnumerable<ActorDTO>>> GetAll([FromQuery] GetAllActorsDTO request)
         {
-            var actors = await _service.GetAllActorsAsync(request);
+            var actors = await _manager.ActorService.GetAllActorsAsync(request);
             return Ok(actors);
         }
 
@@ -45,10 +45,10 @@ namespace Movie.API.Controllers
         /// <returns>The requested actor.</returns>
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ActorDTO))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ExceptionDTO))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         public async Task<ActionResult<ActorDTO>> Get([FromRoute] int id)
         {
-            var actor = await _service.GetActorAsync(id);
+            var actor = await _manager.ActorService.GetActorAsync(id);
             return Ok(actor);
         }
 
@@ -59,11 +59,11 @@ namespace Movie.API.Controllers
         /// <returns>The created actor with location header.</returns>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ActorDTO))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ExceptionDTO))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ExceptionDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> Create([FromBody] CreateActorDTO request)
         {
-            var actor = await _service.CreateActorAsync(request);
+            var actor = await _manager.ActorService.CreateActorAsync(request);
             return CreatedAtAction(nameof(Get), new { id = actor.Id }, actor);
         }
 
@@ -75,11 +75,11 @@ namespace Movie.API.Controllers
         /// <returns>No content on success.</returns>
         [HttpPost("{filmId:int}/{actorId:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ExceptionDTO))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ExceptionDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> AssignActorToFilm([FromRoute] int filmId, [FromRoute] int actorId)
         {
-            await _service.AssignActorToFilmAsync(filmId, actorId);
+            await _manager.ActorService.AssignActorToFilmAsync(filmId, actorId);
             return NoContent();
         }
 
@@ -91,11 +91,11 @@ namespace Movie.API.Controllers
         /// <returns>No content on success.</returns>
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ExceptionDTO))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ExceptionDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateActorDTO request)
         {
-            await _service.UpdateActorAsync(id, request);
+            await _manager.ActorService.UpdateActorAsync(id, request);
             return NoContent();
         }
 
@@ -106,10 +106,10 @@ namespace Movie.API.Controllers
         /// <returns>No content on success.</returns>
         [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ExceptionDTO))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            await _service.DeleteActorAsync(id);
+            await _manager.ActorService.DeleteActorAsync(id);
             return NoContent();
         }
     }

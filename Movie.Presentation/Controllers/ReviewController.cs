@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Movie.Contracts.Services;
+using Movie.Contracts;
 using Movie.Core.DTOs;
 using Movie.Core.DTOs.Reviews;
 
@@ -14,15 +14,14 @@ namespace Movie.API.Controllers
     [Produces("application/json")]
     public class ReviewController : ControllerBase
     {
-        private readonly IReviewService _service;
+        private readonly IServiceManager _manager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ReviewController"/>.
         /// </summary>
-        /// <param name="service">The review service.</param>
-        public ReviewController(IReviewService service)
+        public ReviewController(IServiceManager manager)
         {
-            _service = service;
+            _manager = manager;
         }
 
         /// <summary>
@@ -32,10 +31,10 @@ namespace Movie.API.Controllers
         /// <returns>The review data.</returns>
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ReviewDTO))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ExceptionDTO))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         public async Task<ActionResult<ReviewDTO>> Get([FromRoute] int id)
         {
-            var review = await _service.GetReviewAsync(id);
+            var review = await _manager.ReviewService.GetReviewAsync(id);
             return Ok(review);
         }
 
@@ -46,11 +45,11 @@ namespace Movie.API.Controllers
         /// <returns>The created review with location header.</returns>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(ReviewDTO))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ExceptionDTO))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ExceptionDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> Create([FromBody] CreateReviewDTO request)
         {
-            var review = await _service.CreateReviewAsync(request);
+            var review = await _manager.ReviewService.CreateReviewAsync(request);
             return CreatedAtAction(nameof(Get), new { id = review.Id }, review);
         }
 
@@ -62,11 +61,11 @@ namespace Movie.API.Controllers
         /// <returns>No content on success.</returns>
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ExceptionDTO))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ExceptionDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateReviewDTO request)
         {
-            await _service.UpdateReviewAsync(id, request);
+            await _manager.ReviewService.UpdateReviewAsync(id, request);
             return NoContent();
         }
 
@@ -80,7 +79,7 @@ namespace Movie.API.Controllers
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            await _service.DeleteReviewAsync(id);
+            await _manager.ReviewService.DeleteReviewAsync(id);
             return NoContent();
         }
     }

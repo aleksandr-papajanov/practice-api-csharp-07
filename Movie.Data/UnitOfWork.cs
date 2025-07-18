@@ -13,9 +13,10 @@ namespace Movie.Data
         private readonly AppDbContext _context;
 
         private readonly Lazy<IFilmRepository> _filmRepository;
+        private readonly Lazy<IFilmGenreRepository> _filmGenreRepository;
+        private readonly Lazy<IFilmDetailsRepository> _filmDetailsRepository;
         private readonly Lazy<IActorRepository> _actorRepository;
         private readonly Lazy<IFilmActorRepository> _filmActorRepository;
-        private readonly Lazy<IFilmDetailsRepository> _filmDetailsRepository;
         private readonly Lazy<IReviewRepository> _reviewRepository;
 
         public IFilmRepository FilmRepository => _filmRepository.Value;
@@ -23,22 +24,24 @@ namespace Movie.Data
         public IFilmActorRepository FilmActorRepository => _filmActorRepository.Value;
         public IFilmDetailsRepository FilmDetailsRepository => _filmDetailsRepository.Value;
         public IReviewRepository ReviewRepository => _reviewRepository.Value;
+        public IFilmGenreRepository FilmGenreRepository => _filmGenreRepository.Value;
 
-        
         public UnitOfWork(
             AppDbContext context,
             Lazy<IFilmRepository> filmRepository,
+            Lazy<IFilmGenreRepository> filmGenreRepository,
+            Lazy<IFilmDetailsRepository> filmDetailsRepository,
             Lazy<IActorRepository> actorRepository,
             Lazy<IFilmActorRepository> filmActorRepository,
-            Lazy<IFilmDetailsRepository> filmDetailsRepository,
             Lazy<IReviewRepository> reviewRepository)
         {
             _context = context;
 
             _filmRepository = filmRepository;
+            _filmGenreRepository = filmGenreRepository;
+            _filmDetailsRepository = filmDetailsRepository;
             _actorRepository = actorRepository;
             _filmActorRepository = filmActorRepository;
-            _filmDetailsRepository = filmDetailsRepository;
             _reviewRepository = reviewRepository;
         }
 

@@ -1,11 +1,10 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using Microsoft.AspNetCore.Mvc.ModelBinding;
-using Movie.API.Helpers;
-using Movie.Core.Exceptions;
+using Movie.Services.Exceptions;
 
 namespace Movie.API.Middleware
 {
-    internal class ValidateModelStateFilterAttribute : ActionFilterAttribute
+    internal class ModelStateValidationFilterAttribute : ActionFilterAttribute
     {
         public override void OnActionExecuting(ActionExecutingContext context)
         {
@@ -16,9 +15,9 @@ namespace Movie.API.Middleware
             }
         }
 
-        private Dictionary<string, List<string>> GetErrors(ModelStateDictionary modelState)
+        private Dictionary<string, ICollection<string>> GetErrors(ModelStateDictionary modelState)
         {
-            var collection = new Dictionary<string, List<string>>();
+            var collection = new Dictionary<string, ICollection<string>>();
 
             foreach (var state in modelState)
             {

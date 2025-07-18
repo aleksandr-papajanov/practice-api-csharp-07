@@ -5,7 +5,7 @@
 namespace Movie.Data.Migrations
 {
     /// <inheritdoc />
-    public partial class Init : Migration
+    public partial class Genre : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -26,21 +26,40 @@ namespace Movie.Data.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "FilmGenre",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Name = table.Column<string>(type: "nvarchar(450)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_FilmGenre", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Film",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     Title = table.Column<string>(type: "nvarchar(450)", nullable: false),
-                    Genre = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Year = table.Column<int>(type: "int", nullable: false),
-                    Duration = table.Column<int>(type: "int", nullable: false)
+                    Duration = table.Column<int>(type: "int", nullable: false),
+                    FilmGenreId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Film", x => x.Id);
                     table.CheckConstraint("CK_Film_Duration", "Duration > 0");
                     table.CheckConstraint("CK_Film_Year", "Year >= 1888");
+                    table.ForeignKey(
+                        name: "FK_Film_FilmGenre_FilmGenreId",
+                        column: x => x.FilmGenreId,
+                        principalTable: "FilmGenre",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -73,18 +92,18 @@ namespace Movie.Data.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    MovieId = table.Column<int>(type: "int", nullable: false),
                     Synopsis = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Language = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Budget = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                    Budget = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    FilmId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_FilmDetails", x => x.Id);
                     table.CheckConstraint("CK_FilmDetails_Budget", "Budget > 0");
                     table.ForeignKey(
-                        name: "FK_FilmDetails_Film_MovieId",
-                        column: x => x.MovieId,
+                        name: "FK_FilmDetails_Film_FilmId",
+                        column: x => x.FilmId,
                         principalTable: "Film",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -96,18 +115,18 @@ namespace Movie.Data.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    MovieId = table.Column<int>(type: "int", nullable: false),
                     ReviewerName = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Comment = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Rating = table.Column<int>(type: "int", nullable: false)
+                    Rating = table.Column<int>(type: "int", nullable: false),
+                    FilmId = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Review", x => x.Id);
                     table.CheckConstraint("CK_Review_Rating", "Rating BETWEEN 1 AND 5");
                     table.ForeignKey(
-                        name: "FK_Review_Film_MovieId",
-                        column: x => x.MovieId,
+                        name: "FK_Review_Film_FilmId",
+                        column: x => x.FilmId,
                         principalTable: "Film",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -118,6 +137,11 @@ namespace Movie.Data.Migrations
                 table: "Actor",
                 column: "Name",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Film_FilmGenreId",
+                table: "Film",
+                column: "FilmGenreId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Film_Title",
@@ -131,15 +155,21 @@ namespace Movie.Data.Migrations
                 column: "ActorId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_FilmDetails_MovieId",
+                name: "IX_FilmDetails_FilmId",
                 table: "FilmDetails",
-                column: "MovieId",
+                column: "FilmId",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Review_MovieId",
+                name: "IX_FilmGenre_Name",
+                table: "FilmGenre",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Review_FilmId",
                 table: "Review",
-                column: "MovieId");
+                column: "FilmId");
         }
 
         /// <inheritdoc />
@@ -159,6 +189,9 @@ namespace Movie.Data.Migrations
 
             migrationBuilder.DropTable(
                 name: "Film");
+
+            migrationBuilder.DropTable(
+                name: "FilmGenre");
         }
     }
 }

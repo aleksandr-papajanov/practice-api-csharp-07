@@ -7,6 +7,8 @@ namespace Movie.Core.Entities
         public int Id { get; set; }
         public required string Name { get; set; }
         public int BirthYear { get; set; }
+
+        // Navigation properties
         public ICollection<FilmActor> FilmActors { get; set; } = [];
 
         [NotMapped]

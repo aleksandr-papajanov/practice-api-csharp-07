@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Movie.Contracts.Services;
+using Movie.Contracts;
 using Movie.Core.DTOs;
 using Movie.Core.DTOs.Films;
 
@@ -14,14 +14,14 @@ namespace Movie.API.Controllers
     [Produces("application/json")]
     public class FilmController : ControllerBase
     {
-        private readonly IFilmService _service;
+        private readonly IServiceManager _manager;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="FilmController"/>.
         /// </summary>
-        public FilmController(IFilmService service)
+        public FilmController(IServiceManager manager)
         {
-            _service = service;
+            _manager = manager;
         }
 
         /// <summary>
@@ -31,10 +31,10 @@ namespace Movie.API.Controllers
         /// <returns>A list of movies.</returns>
         [HttpGet]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(IEnumerable<FilmDTO>))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ExceptionDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
         public async Task<ActionResult<IEnumerable<FilmDTO>>> GetAll([FromQuery] GetAllFilmsDTO request)
         {
-            var result = await _service.GetAllFilmsAsync(request);
+            var result = await _manager.FilmService.GetAllFilmsAsync(request);
             return Ok(result);
         }
 
@@ -45,10 +45,10 @@ namespace Movie.API.Controllers
         /// <returns>The movie data.</returns>
         [HttpGet("{id:int}")]
         [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FilmDTO))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ExceptionDTO))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         public async Task<ActionResult<FilmDTO>> Get([FromRoute] int id)
         {
-            var movie = await _service.GetFilmAsync(id);
+            var movie = await _manager.FilmService.GetFilmAsync(id);
             return Ok(movie);
         }
 
@@ -58,11 +58,11 @@ namespace Movie.API.Controllers
         /// <param name="id">The ID of the movie.</param>
         /// <returns>The detailed movie data.</returns>
         [HttpGet("{id:int}/details")]
-        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(FilmDetailsDTO))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ExceptionDTO))]
+        [ProducesResponseType(StatusCodes.Status200OK, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         public async Task<ActionResult<FilmDetailsDTO>> GetDetails([FromRoute] int id)
         {
-            var movie = await _service.GetFilmDetailsAsync(id);
+            var movie = await _manager.FilmService.GetFilmDetailsAsync(id);
             return Ok(movie);
         }
 
@@ -73,11 +73,11 @@ namespace Movie.API.Controllers
         /// <returns>The created movie with location header.</returns>
         [HttpPost]
         [ProducesResponseType(StatusCodes.Status201Created, Type = typeof(FilmDTO))]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ExceptionDTO))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ExceptionDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> Create([FromBody] CreateFilmDTO request)
         {
-            var movie = await _service.CreateFilmAsync(request);
+            var movie = await _manager.FilmService.CreateFilmAsync(request);
             return CreatedAtAction(nameof(Get), new { id = movie.Id }, movie);
         }
 
@@ -89,11 +89,11 @@ namespace Movie.API.Controllers
         /// <returns>No content on success.</returns>
         [HttpPut("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ExceptionDTO))]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ExceptionDTO))]
+        [ProducesResponseType(StatusCodes.Status400BadRequest, Type = typeof(ProblemDetails))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> Update([FromRoute] int id, [FromBody] UpdateFilmDTO request)
         {
-            await _service.UpdateFilmAsync(id, request);
+            await _manager.FilmService.UpdateFilmAsync(id, request);
             return NoContent();
         }
 
@@ -104,10 +104,10 @@ namespace Movie.API.Controllers
         /// <returns>No content on success.</returns>
         [HttpDelete("{id:int}")]
         [ProducesResponseType(StatusCodes.Status204NoContent)]
-        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ExceptionDTO))]
+        [ProducesResponseType(StatusCodes.Status404NotFound, Type = typeof(ProblemDetails))]
         public async Task<IActionResult> Delete([FromRoute] int id)
         {
-            await _service.DeleteFilmAsync(id);
+            await _manager.FilmService.DeleteFilmAsync(id);
             return NoContent();
         }
     }

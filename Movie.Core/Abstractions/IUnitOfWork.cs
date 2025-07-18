@@ -10,9 +10,10 @@ namespace Movie.Core.Abstractions
     public interface IUnitOfWork
     {
         IFilmRepository FilmRepository { get; }
+        IFilmGenreRepository FilmGenreRepository { get; }
+        IFilmDetailsRepository FilmDetailsRepository { get; }
         IActorRepository ActorRepository { get; }
         IFilmActorRepository FilmActorRepository { get; }
-        IFilmDetailsRepository FilmDetailsRepository { get; }
         IReviewRepository ReviewRepository { get; }
 
         Task CompleteAsync();
