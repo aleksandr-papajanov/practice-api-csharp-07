@@ -2,6 +2,7 @@
 using Movie.Contracts;
 using Movie.Core.Abstractions;
 using Movie.Core.DTOs.Actors;
+using Movie.Core.DTOs.Common;
 using Movie.Core.Entities;
 using Movie.Services.Exceptions;
 using Movie.Services.Mappers;
@@ -19,7 +20,7 @@ namespace Movie.Services
         }
 
 
-        public async Task<IEnumerable<ActorDTO>> GetAllActorsAsync(GetAllActorsDTO request)
+        public async Task<PaginatedResult<ActorDTO>> GetAllActorsAsync(GetAllActorsDTO request)
         {
             var query = _unitOfWork.ActorRepository.All
                 .Include(e => e.FilmActors)
@@ -27,12 +28,16 @@ namespace Movie.Services
                 .AsQueryable();
 
             query = query
-                .Skip(request.Skip)
-                .Take(request.Take);
+                .Skip((request.PageNumber - 1) * request.PageSize)
+                .Take(request.PageSize);
 
             var actors = await query.ToListAsync();
 
-            return actors.Select(e => e.ToDTO()).ToList();
+            return new PaginatedResult<ActorDTO>(
+                items: actors.Select(e => e.ToDTO()).ToList(),
+                totalCount: await _unitOfWork.ActorRepository.All.CountAsync(),
+                currentPage: request.PageNumber,
+                pageSize: request.PageSize);
         }
 
         public async Task<ActorDTO> GetActorAsync(int id)

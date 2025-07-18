@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Movie.Contracts;
 using Movie.Core.Abstractions;
+using Movie.Core.DTOs.Common;
 using Movie.Core.DTOs.Films;
 using Movie.Core.Entities;
 using Movie.Services.Exceptions;
@@ -19,7 +20,7 @@ namespace Movie.Services
         }
 
 
-        public async Task<IEnumerable<FilmDTO>> GetAllFilmsAsync(GetAllFilmsDTO request)
+        public async Task<PaginatedResult<FilmDTO>> GetAllFilmsAsync(GetAllFilmsDTO request)
         {
             var query = _unitOfWork.FilmRepository.All
                 .Include(e => e.FilmActors)
@@ -39,12 +40,16 @@ namespace Movie.Services
                         e.Actor.Name.ToLower().Contains(request.Actor.ToLower()))); // StringComparison here is not available in EF Core LINQ
 
             query = query
-                .Skip(request.Skip)
-                .Take(request.Take);
+                .Skip((request.PageNumber - 1) * request.PageSize)
+                .Take(request.PageSize);
 
             var films = await query.ToListAsync();
 
-            return films.Select(e => e.ToDTO()).ToList();
+            return new PaginatedResult<FilmDTO>(
+                items: films.Select(e => e.ToDTO()).ToList(),
+                totalCount: await _unitOfWork.ActorRepository.All.CountAsync(),
+                currentPage: request.PageNumber,
+                pageSize: request.PageSize);
         }
 
         public async Task<FilmDTO> GetFilmAsync(int id)

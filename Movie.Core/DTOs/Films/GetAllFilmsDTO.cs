@@ -9,16 +9,16 @@ namespace Movie.Core.DTOs.Films
     public class GetAllFilmsDTO
     {
         /// <summary>
-        /// The number of movies to skip. Must be zero or greater.
+        /// The page number to retrieve. Must be 1 or greater.
         /// </summary>
-        [Range(0, int.MaxValue)]
-        public int Skip { get; set; } = 0;
+        [Range(1, int.MaxValue)]
+        public int PageNumber { get; set; } = 1;
 
         /// <summary>
-        /// The number of movies to take. Must be between 1 and 100.
+        /// The number of actors per page. Must be between 1 and 100.
         /// </summary>
         [Range(1, 100)]
-        public int Take { get; set; } = 50;
+        public int PageSize { get; set; } = 20;
 
         /// <summary>
         /// An optional genre to filter the movies by. Max length is 256 characters.
