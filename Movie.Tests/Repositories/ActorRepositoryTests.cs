@@ -73,7 +73,7 @@ namespace Movie.Tests.Repositories
             await context.SaveChangesAsync();
 
             var updatedActor = await context.Actors.FindAsync(1);
-            updatedActor.Name.Should().Be("Updated Name");
+            updatedActor!.Name.Should().Be("Updated Name");
         }
 
         [Fact]

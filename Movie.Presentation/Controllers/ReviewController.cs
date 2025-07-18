@@ -4,7 +4,7 @@ using Movie.Contracts;
 using Movie.Core.DTOs;
 using Movie.Core.DTOs.Reviews;
 
-namespace Movie.API.Controllers
+namespace Movie.Presentation.Controllers
 {
     /// <summary>
     /// Controller for managing reviews for movies.

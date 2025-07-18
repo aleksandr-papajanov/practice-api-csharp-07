@@ -20,13 +20,11 @@ namespace Movie.API.Services
         private const int DefaultActorCount = 50;
 
         private readonly IServiceScopeFactory _scopeFactory;
-        private readonly ILogger<DataSeedingService> _logger;
-        private AppDbContext _context;
+        private AppDbContext _context = null!;
 
-        public DataSeedingService(IServiceScopeFactory scopeFactory, ILogger<DataSeedingService> logger)
+        public DataSeedingService(IServiceScopeFactory scopeFactory)
         {
             _scopeFactory = scopeFactory;
-            _logger = logger;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
@@ -80,7 +78,7 @@ namespace Movie.API.Services
             _context.Films.Add(film);
             _context.SaveChanges();
 
-            Random rnd = new Random();
+            Random rnd = new();
             var actorCount = genre == FilmGenres.Documentary
                 ? rnd.Next(0, 10 + 1)
                 : rnd.Next(0, 15 + 1);

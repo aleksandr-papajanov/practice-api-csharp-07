@@ -1,4 +1,6 @@
-﻿using Movie.Core.Entities;
+﻿#pragma warning disable CS1591
+
+using Movie.Core.Entities;
 using Movie.Core.Exceptions;
 using System;
 using System.Collections.Generic;

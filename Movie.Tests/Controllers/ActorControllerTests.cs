@@ -1,11 +1,11 @@
 ﻿using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
-using Movie.API.Controllers;
 using Movie.Contracts;
 using Movie.Core.DTOs.Actors;
 using Movie.Core.DTOs.Common;
-using Movie.Core.Exceptions;
+using Movie.Core.Exceptions.NotFound;
+using Movie.Presentation.Controllers;
 
 namespace Movie.Tests.Controllers
 {
@@ -31,8 +31,8 @@ namespace Movie.Tests.Controllers
             // Arrange
             var actors = new List<ActorDTO>
             {
-                new ActorDTO { Id = 1, Name = "Actor 1", BirthYear = 1980 },
-                new ActorDTO { Id = 2, Name = "Actor 2", BirthYear = 1990 }
+                new() { Id = 1, Name = "Actor 1", BirthYear = 1980 },
+                new() { Id = 2, Name = "Actor 2", BirthYear = 1990 }
             };
             var paginatedResult = new PaginatedResult<ActorDTO>(
                 items: actors,

@@ -5,7 +5,7 @@ namespace Movie.Services.Mappers
 {
     public static class FilmMapper
     {
-        public static FilmDTO ToDTO(this Film entity) => new FilmDTO
+        public static FilmDTO ToDTO(this Film entity) => new ()
         {
             Id = entity.Id,
             Title = entity.Title,
@@ -14,7 +14,7 @@ namespace Movie.Services.Mappers
             Duration = entity.Duration
         };
 
-        public static FilmDetailsDTO ToDetailsDTO(this Film entity) => new FilmDetailsDTO
+        public static FilmDetailsDTO ToDetailsDTO(this Film entity) => new ()
         {
             Id = entity.Id,
             Title = entity.Title,
@@ -28,7 +28,7 @@ namespace Movie.Services.Mappers
             Reviews = entity.Reviews.Select(e => e.ToDTO())
         };
 
-        public static UpdateFilmDTO ToUpdateDTO(this Film entity) => new UpdateFilmDTO
+        public static UpdateFilmDTO ToUpdateDTO(this Film entity) => new ()
         {
             Title = entity.Title,
             Genre = entity.FilmGenre.Name,
@@ -39,14 +39,14 @@ namespace Movie.Services.Mappers
             Budget = entity.Details.Budget
         };
 
-        public static Film ToEntity(this CreateFilmDTO dto) => new Film
+        public static Film ToEntity(this CreateFilmDTO dto) => new ()
         {
             Title = dto.Title,
             Year = dto.Year,
             Duration = dto.Duration
         };
 
-        public static FilmDetails ToDetailsEntity(this CreateFilmDTO dto) => new FilmDetails
+        public static FilmDetails ToDetailsEntity(this CreateFilmDTO dto) => new ()
         {
             Language = dto.Language,
             Synopsis = dto.Synopsis,

@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Filters;
 using Movie.API.Helpers;
+using Movie.Core;
 using Movie.Core.Exceptions;
 
 namespace Movie.API.Middleware

@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿#pragma warning disable CS1591
 
-namespace Movie.Core.Exceptions
+using Microsoft.AspNetCore.Http;
+
+namespace Movie.Core.Exceptions.BadRequest
 {
     public abstract class BadRequestAppException : AppExceptionBase
     {

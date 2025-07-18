@@ -2,14 +2,9 @@
 
 namespace Movie.Core.Attributes
 {
-    internal class YearUntilNowAttribute : ValidationAttribute
+    internal class YearUntilNowAttribute(int minYear) : ValidationAttribute
     {
-        private readonly int _minYear;
-
-        public YearUntilNowAttribute(int minYear)
-        {
-            _minYear = minYear;
-        }
+        private readonly int _minYear = minYear;
 
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
         {

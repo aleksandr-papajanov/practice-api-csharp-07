@@ -1,6 +1,8 @@
 ﻿using Movie.Core.Contracts.Repositories;
 using Movie.Core.Entities;
 using Movie.Core.Exceptions;
+using Movie.Core.Exceptions.Conflict;
+using Movie.Core.Exceptions.NotFound;
 
 namespace Movie.Data.Repositories
 {

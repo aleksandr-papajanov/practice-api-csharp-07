@@ -1,4 +1,6 @@
-﻿using Movie.Core.Contracts.Repositories;
+﻿#pragma warning disable CS1591
+
+using Movie.Core.Contracts.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;

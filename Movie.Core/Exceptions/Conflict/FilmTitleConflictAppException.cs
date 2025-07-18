@@ -1,4 +1,6 @@
-﻿namespace Movie.Core.Exceptions
+﻿#pragma warning disable CS1591
+
+namespace Movie.Core.Exceptions.Conflict
 {
     public class FilmTitleConflictAppException : ConflictAppException
     {

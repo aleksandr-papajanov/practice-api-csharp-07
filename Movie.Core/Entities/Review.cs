@@ -1,4 +1,6 @@
-﻿namespace Movie.Core.Entities
+﻿#pragma warning disable CS1591
+
+namespace Movie.Core.Entities
 {
     public class Review : EntityBase
     {

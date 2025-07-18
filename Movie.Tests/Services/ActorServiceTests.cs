@@ -2,7 +2,8 @@
 using Microsoft.EntityFrameworkCore;
 using Movie.Core.DTOs.Actors;
 using Movie.Core.Entities;
-using Movie.Core.Exceptions;
+using Movie.Core.Exceptions.Conflict;
+using Movie.Core.Exceptions.NotFound;
 using Movie.Data;
 using Movie.Services;
 using Movie.Tests.Services;

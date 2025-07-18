@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿#pragma warning disable CS1591
+
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Movie.Core.Entities
 {

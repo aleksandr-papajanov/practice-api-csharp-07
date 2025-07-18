@@ -1,12 +1,13 @@
 ﻿using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.EntityFrameworkCore;
-using Movie.API.Helpers;
 using Movie.Contracts;
+using Movie.Core;
 using Movie.Core.Contracts;
 using Movie.Core.DTOs.Common;
 using Movie.Core.DTOs.Films;
 using Movie.Core.Entities;
-using Movie.Core.Exceptions;
+using Movie.Core.Exceptions.BadRequest;
+using Movie.Core.Exceptions.NotFound;
 using Movie.Services.Mappers;
 
 namespace Movie.Services

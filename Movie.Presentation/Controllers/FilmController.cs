@@ -5,7 +5,7 @@ using Movie.Contracts;
 using Movie.Core.DTOs;
 using Movie.Core.DTOs.Films;
 
-namespace Movie.API.Controllers
+namespace Movie.Presentation.Controllers
 {
     /// <summary>
     /// Controller for managing movies and retrieving movie details.

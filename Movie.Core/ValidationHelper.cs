@@ -1,8 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc.ModelBinding;
+﻿#pragma warning disable CS1591
+
+using Microsoft.AspNetCore.Mvc.ModelBinding;
 using Movie.Core.Exceptions;
 using System.ComponentModel.DataAnnotations;
 
-namespace Movie.API.Helpers
+namespace Movie.Core
 {
     public static class ValidationHelper
     {
@@ -27,17 +29,12 @@ namespace Movie.API.Helpers
 
         public static Dictionary<string, List<string>> GetErrors(ModelStateDictionary modelState)
         {
-            var collection = new Dictionary<string, List<string>>();
-
-            foreach (var state in modelState)
-            {
-                if (!state.Value.Errors.Any())
-                    continue;
-
-                collection.Add(
-                    state.Key,
-                    state.Value.Errors.Select(x => x.ErrorMessage).ToList());
-            }
+            var collection = modelState
+                .Where(state => state.Value.Errors.Any())
+                .ToDictionary(
+                    state => state.Key,
+                    state => state.Value.Errors.Select(x => x.ErrorMessage).ToList()
+                );
 
             return collection;
         }

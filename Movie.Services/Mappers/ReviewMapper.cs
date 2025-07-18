@@ -5,7 +5,7 @@ namespace Movie.Services.Mappers
 {
     public static class ReviewMapper
     {
-        public static ReviewDTO ToDTO(this Review entity) => new ReviewDTO
+        public static ReviewDTO ToDTO(this Review entity) => new ()
         {
             Id = entity.Id,
             ReviewerName = entity.ReviewerName,
@@ -13,7 +13,7 @@ namespace Movie.Services.Mappers
             Rating = entity.Rating
         };
 
-        public static Review ToEntity(this CreateReviewDTO dto) => new Review
+        public static Review ToEntity(this CreateReviewDTO dto) => new ()
         {
             FilmId = dto.FilmId,
             ReviewerName = dto.ReviewerName,

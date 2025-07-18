@@ -1,10 +1,9 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Movie.Contracts;
-using Movie.Core.DTOs;
 using Movie.Core.DTOs.Actors;
 
-namespace Movie.API.Controllers
+namespace Movie.Presentation.Controllers
 {
     /// <summary>
     /// Controller for managing actors and assigning them to movies.

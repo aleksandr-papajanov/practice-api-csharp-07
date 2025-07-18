@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿#pragma warning disable CS1591
+
+using Microsoft.AspNetCore.Http;
 
 namespace Movie.Core.Exceptions
 {
