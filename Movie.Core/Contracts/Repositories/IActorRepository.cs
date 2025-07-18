@@ -6,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Movie.Core.Abstractions.Repositories
+namespace Movie.Core.Contracts.Repositories
 {
     public interface IActorRepository : IRepository<Actor>
     {

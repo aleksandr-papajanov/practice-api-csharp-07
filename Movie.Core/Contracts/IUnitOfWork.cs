@@ -1,11 +1,11 @@
-﻿using Movie.Core.Abstractions.Repositories;
+﻿using Movie.Core.Contracts.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Movie.Core.Abstractions
+namespace Movie.Core.Contracts
 {
     public interface IUnitOfWork
     {

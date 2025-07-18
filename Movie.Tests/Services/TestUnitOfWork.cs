@@ -1,5 +1,5 @@
-﻿using Movie.Core.Abstractions;
-using Movie.Core.Abstractions.Repositories;
+﻿using Movie.Core.Contracts;
+using Movie.Core.Contracts.Repositories;
 using Movie.Data;
 using Movie.Data.Repositories;
 

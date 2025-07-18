@@ -1,5 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Movie.Core.Abstractions.Repositories;
+using Movie.Core.Contracts.Repositories;
 using Movie.Core.Entities;
 
 namespace Movie.Data.Repositories

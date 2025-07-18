@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Movie.API.Helpers;
 using Movie.Contracts;
-using Movie.Core.Abstractions;
+using Movie.Core.Contracts;
 using Movie.Core.DTOs.Common;
 using Movie.Core.DTOs.Films;
 using Movie.Core.Entities;
@@ -49,7 +49,7 @@ namespace Movie.Services
 
             return new PaginatedResult<FilmDTO>(
                 items: films.Select(e => e.ToDTO()).ToList(),
-                totalCount: await _uow.ActorRepository.All.CountAsync(),
+                totalCount: await query.CountAsync(),
                 currentPage: request.PageNumber,
                 pageSize: request.PageSize);
         }

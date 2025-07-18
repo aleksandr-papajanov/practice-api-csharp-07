@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Movie.Contracts;
-using Movie.Core.Abstractions;
+using Movie.Core.Contracts;
 using Movie.Core.DTOs.Reviews;
 using Movie.Core.Exceptions;
 using Movie.Services.Mappers;

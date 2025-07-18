@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Movie.Contracts;
-using Movie.Core.Abstractions;
+using Movie.Core.Contracts;
 using Movie.Core.DTOs.Actors;
 using Movie.Core.DTOs.Common;
 using Movie.Core.Entities;
@@ -35,7 +35,7 @@ namespace Movie.Services
 
             return new PaginatedResult<ActorDTO>(
                 items: actors.Select(e => e.ToDTO()).ToList(),
-                totalCount: await _uow.ActorRepository.All.CountAsync(),
+                totalCount: await query.CountAsync(),
                 currentPage: request.PageNumber,
                 pageSize: request.PageSize);
         }

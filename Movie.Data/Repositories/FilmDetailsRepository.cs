@@ -1,4 +1,4 @@
-﻿using Movie.Core.Abstractions.Repositories;
+﻿using Movie.Core.Contracts.Repositories;
 using Movie.Core.Entities;
 using System;
 using System.Collections.Generic;
